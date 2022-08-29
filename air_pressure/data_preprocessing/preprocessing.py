@@ -28,7 +28,7 @@ class Preprocessor:
 
         self.n_components = self.config["pca_model"]["n_components"]
 
-        self.input_files_bucket = self.config["s3_bucket"]["input_files"]
+        self.input_files_bucket = self.config["s3_bucket"]["input_files_bucket"]
 
         self.s3 = S3_Operation()
 

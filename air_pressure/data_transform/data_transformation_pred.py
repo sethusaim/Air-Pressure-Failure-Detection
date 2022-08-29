@@ -21,7 +21,7 @@ class Data_Transform_Pred:
 
         self.log_writer = App_Logger()
 
-        self.good_pred_data_dir = self.config["data"]["pred"]["good"]
+        self.good_pred_data_dir = self.config["data"]["pred"]["good_data_dir"]
 
         self.class_name = self.__class__.__name__
 

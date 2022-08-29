@@ -27,19 +27,19 @@ class Raw_Pred_Data_Validation:
 
         self.pred_data_bucket = self.config["s3_bucket"]["air_pressure_pred_data"]
 
-        self.input_files_bucket = self.config["s3_bucket"]["input_files"]
+        self.input_files_bucket = self.config["s3_bucket"]["input_files_bucket"]
 
         self.raw_pred_data_dir = self.config["data"]["raw_data"]["pred_batch"]
 
-        self.pred_schema_file = self.config["schema_file"]["pred"]
+        self.pred_schema_file = self.config["schema_file"]["pred_schema_file"]
 
         self.regex_file = self.config["regex_file"]
 
         self.pred_schema_log = self.config["pred_db_log"]["values_from_schema"]
 
-        self.good_pred_data_dir = self.config["data"]["pred"]["good"]
+        self.good_pred_data_dir = self.config["data"]["pred"]["good_data_dir"]
 
-        self.bad_pred_data_dir = self.config["data"]["pred"]["bad"]
+        self.bad_pred_data_dir = self.config["data"]["pred"]["bad_data_dir"]
 
         self.pred_gen_log = self.config["pred_db_log"]["general"]
 

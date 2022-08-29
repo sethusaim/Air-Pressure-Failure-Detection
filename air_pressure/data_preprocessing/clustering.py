@@ -20,7 +20,7 @@ class KMeans_Clustering:
 
         self.config = read_params()
 
-        self.input_files_bucket = self.config["s3_bucket"]["input_files"]
+        self.input_files_bucket = self.config["s3_bucket"]["input_files_bucket"]
 
         self.model_bucket = self.config["s3_bucket"]["air_pressure_model"]
 

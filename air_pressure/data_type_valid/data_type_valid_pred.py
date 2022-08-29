@@ -22,9 +22,9 @@ class DB_Operation_Pred:
 
         self.pred_export_csv_file = self.config["export_csv_file"]["pred"]
 
-        self.good_data_pred_dir = self.config["data"]["pred"]["good"]
+        self.good_data_pred_dir = self.config["data"]["pred"]["good_data_dir"]
 
-        self.input_files_bucket = self.config["s3_bucket"]["input_files"]
+        self.input_files_bucket = self.config["s3_bucket"]["input_files_bucket"]
 
         self.pred_db_insert_log = self.config["pred_db_log"]["db_insert"]
 

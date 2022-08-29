@@ -15,13 +15,13 @@ class Data_Transform_Train:
     def __init__(self):
         self.config = read_params()
 
-        self.train_data_bucket = self.config["s3_bucket"]["air_pressure_train_data"]
+        self.train_data_bucket = self.config["s3_bucket"]["air_pressure_train_data_bucket"]
 
         self.s3 = S3_Operation()
 
         self.log_writer = App_Logger()
 
-        self.good_train_data_dir = self.config["data"]["train"]["good"]
+        self.good_train_data_dir = self.config["data"]["train"]["good_data_dir"]
 
         self.class_name = self.__class__.__name__
 

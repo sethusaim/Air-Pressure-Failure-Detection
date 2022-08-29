@@ -25,21 +25,21 @@ class Raw_Train_Data_Validation:
 
         self.s3 = S3_Operation()
 
-        self.train_data_bucket = self.config["s3_bucket"]["air_pressure_train_data"]
+        self.train_data_bucket = self.config["s3_bucket"]["air_pressure_train_data_bucket"]
 
-        self.input_files_bucket = self.config["s3_bucket"]["input_files"]
+        self.input_files_bucket = self.config["s3_bucket"]["input_files_bucket"]
 
         self.raw_train_data_dir = self.config["data"]["raw_data"]["train_batch"]
 
-        self.train_schema_file = self.config["schema_file"]["train"]
+        self.train_schema_file = self.config["schema_file"]["train_schema_file"]
 
         self.regex_file = self.config["regex_file"]
 
         self.train_schema_log = self.config["train_db_log"]["values_from_schema"]
 
-        self.good_train_data_dir = self.config["data"]["train"]["good"]
+        self.good_train_data_dir = self.config["data"]["train"]["good_data_dir"]
 
-        self.bad_train_data_dir = self.config["data"]["train"]["bad"]
+        self.bad_train_data_dir = self.config["data"]["train"]["bad_data_dir"]
 
         self.train_gen_log = self.config["train_db_log"]["general"]
 
