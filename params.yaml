@@ -109,7 +109,7 @@ db_log.txt:
   train: air_pressure_training_log.txt
   pred: air_pressure_prediction_log.txt
 
-train_db_log.txt:
+train_db_log:
   model_training: model_training_log.txt
   col_validation: train_col_validation_log.txt
   data_transform: train_data_transform_log.txt
