@@ -1,5 +1,5 @@
-variable "wafer_clustering_ecr_name" {
-  default = "wafer_clustering"
+variable "air_pressure_ecr_name" {
+  default = "air-pressure-ecr"
   type    = string
 }
 
