@@ -1,10 +1,10 @@
 import mlflow
-from scania.mlflow_utils.mlflow_operations import MLFlow_Operation
-from scania.model_finder.tuner import Model_Finder
-from scania.s3_bucket_operations.s3_operations import S3_Operation
 from sklearn.metrics import accuracy_score, roc_auc_score
 from sklearn.model_selection import GridSearchCV, train_test_split
 
+from air_pressure.mlflow_utils.mlflow_operations import MLFlow_Operation
+from air_pressure.model_finder.tuner import Model_Finder
+from air_pressure.s3_bucket_operations.s3_operations import S3_Operation
 from utils.logger import App_Logger
 from utils.read_params import read_params
 

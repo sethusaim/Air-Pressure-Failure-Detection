@@ -1,5 +1,6 @@
 import os
-from scania.s3_bucket_operations.s3_operations import S3_Operation
+
+from air_pressure.s3_bucket_operations.s3_operations import S3_Operation
 
 s3 = S3_Operation()
 
