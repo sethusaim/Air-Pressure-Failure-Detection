@@ -21,9 +21,9 @@ data:
     bad_data_dir: bad/pred
 
 mongodb:
-  scania_data_db_name: scania-data
-  scania_train_data_collection: scania-train-data
-  scania_pred_data_collection: scania-pred-data
+  air_pressure_data_db_name: air_pressure-data
+  air_pressure_train_data_collection: air_pressure-train-data
+  air_pressure_pred_data_collection: air_pressure-pred-data
 
 knn_imputer:
   n_neighbors : 3
@@ -41,11 +41,11 @@ pca_model:
 
 s3_bucket:
   input_files_bucket: input-files-for-train-and-pred
-  scania_model_bucket: scania-model
-  scania-mlflow_bucket: scania-mlflow
-  scania_pred_data_bucket: scania-pred-data
-  scania_train_data_bucket: scania-train-data
-  scania_raw_data_bucket: scania-raw-data
+  air_pressure_model_bucket: air_pressure-model
+  air_pressure-mlflow_bucket: air_pressure-mlflow
+  air_pressure_pred_data_bucket: air_pressure-pred-data
+  air_pressure_train_data_bucket: air_pressure-train-data
+  air_pressure_raw_data_bucket: air_pressure-raw-data
 
 models_dir:
   trained : trained
@@ -100,13 +100,13 @@ model_params:
       - 300
 
 mlflow_config:
-  experiment_name : scania-exp-2
+  experiment_name : air_pressure-exp-2
   run_name : mlops
   serialization_format : cloudpickle  
 
 db_log:
-  train : scania_training_logs
-  pred : scania_prediction_logs
+  train : air_pressure_training_logs
+  pred : air_pressure_prediction_logs
 
 train_db_log:
   model_training : model_training_log
@@ -145,7 +145,7 @@ null_values_csv_file : null_values.csv
 
 pred_output_file : predictions.csv
 
-regex_file: scania_regex.txt
+regex_file: air_pressure_regex.txt
 
 
 export_csv_file:
