@@ -14,6 +14,10 @@ module "ecr_repo" {
   source = "./ecr"
 }
 
+module "logs_bucket" {
+  source = "./s3_buckets/air_pressure_logs_bucket"
+}
+
 module "io_files_bucket" {
   source = "./s3_buckets/air_pressure_io_files_bucket"
 }
