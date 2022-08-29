@@ -5,7 +5,6 @@ from mlflow.tracking import MlflowClient
 
 from air_pressure.s3_bucket_operations.s3_operations import S3_Operation
 from utils.logger import App_Logger
-from utils.model_utils import Model_Utils
 from utils.read_params import read_params
 
 
@@ -23,8 +22,6 @@ class MLFlow_Operation:
         self.class_name = self.__class__.__name__
 
         self.log_writer = App_Logger()
-
-        self.model_utils = Model_Utils()
 
         self.s3 = S3_Operation()
 
