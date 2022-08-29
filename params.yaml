@@ -46,6 +46,7 @@ s3_bucket:
   air_pressure_pred_data_bucket: air_pressure-pred-data
   air_pressure_train_data_bucket: air_pressure-train-data
   air_pressure_raw_data_bucket: air_pressure-raw-data
+  air_pressure_logs_bucket: air-pressure-logs
 
 models_dir:
   trained: trained
