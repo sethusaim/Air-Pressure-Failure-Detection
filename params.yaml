@@ -40,7 +40,7 @@ pca_model:
   n_components: 100
 
 s3_bucket:
-  input_files_bucket: input-files-for-train-and-pred
+  input_files_bucket: air_pressure-io-files
   air_pressure_model_bucket: air_pressure-model
   air_pressure-mlflow_bucket: air_pressure-mlflow
   air_pressure_pred_data_bucket: air_pressure-pred-data
@@ -100,43 +100,41 @@ model_params:
       - 300
 
 mlflow_config:
-  experiment_name: air_pressure-exp-2
+  experiment_name: air_pressure-exp-1
   run_name: mlops
   serialization_format: cloudpickle
 
-db_log:
-  train: air_pressure_training_logs
-  pred: air_pressure_prediction_logs
+db_log.txt:
+  train: air_pressure_training_log.txt
+  pred: air_pressure_prediction_log.txt
 
-train_db_log:
-  model_training: model_training_log
-  col_validation: train_col_validation_log
-  data_transform: train_data_transform_log
-  export_csv: train_export_csv_log
-  general: train_general_log
-  db_insert: train_db_insert_log
-  load_prod_model: load_prod_model_log
-  missing_values_in_col: train_missing_values_log
-  name_validation: train_name_validation_log
-  train_main: train_main_log
-  values_from_schema: train_values_from_schema_log
+train_db_log.txt:
+  model_training: model_training_log.txt
+  col_validation: train_col_validation_log.txt
+  data_transform: train_data_transform_log.txt
+  export_csv: train_export_csv_log.txt
+  general: train_general_log.txt
+  db_insert: train_db_insert_log.txt
+  load_prod_model: load_prod_model_log.txt
+  missing_values_in_col: train_missing_values_log.txt
+  name_validation: train_name_validation_log.txt
+  train_main: train_main_log.txt
+  values_from_schema: train_values_from_schema_log.txt
 
-pred_db_log:
-  col_validation: columnValidationLog
-  db_conn: databaseConnectionLog
-  data_transform: dataTransform
-  db_insert: dbInsertLog
-  db_create: dbTableCreateLog
-  export_csv: ExportToCsvLog
-  general: GeneralLog
-  missing_values_in_col: missingValuesInColumn
-  name_validation: nameValidationLog
-  pred_main: prediction_main_log
-  values_from_schema: valuesfromSchemaValidationLog
+pred_db_log.txt:
+  col_validation: pred_col_validation_log.txt
+  data_transform: pred_data_transform_log.txt
+  db_insert: pred_db_insert_log.txt
+  export_csv: pred_export_csv_log.txt
+  general: pred_general_log.txt
+  missing_values_in_col: pred_missing_values_log.txt
+  name_validation: pred_name_validation_log.txt
+  pred_main: pred_main_log.txt
+  values_from_schema: pred_values_from_schema_log.txt
 
 schema_file:
-  train_schema_file: schema_training.json
-  pred_schema_file: schema_prediction.json
+  train_schema_file: air_pressure_schema_training.json
+  pred_schema_file: air_pressure_schema_prediction.json
 
 elbow_plot_fig: K-Means_Elbow.PNG
 
