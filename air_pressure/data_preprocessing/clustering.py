@@ -22,7 +22,7 @@ class KMeans_Clustering:
 
         self.input_files_bucket = self.config["s3_bucket"]["input_files"]
 
-        self.model_bucket = self.config["s3_bucket"]["scania_model"]
+        self.model_bucket = self.config["s3_bucket"]["air_pressure_model"]
 
         self.random_state = self.config["base"]["random_state"]
 

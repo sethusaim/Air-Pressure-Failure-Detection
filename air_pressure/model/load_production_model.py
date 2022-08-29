@@ -22,9 +22,9 @@ class Load_Prod_Model:
 
         self.num_clusters = num_clusters
 
-        self.model_bucket = self.config["s3_bucket"]["scania_model"]
+        self.model_bucket = self.config["s3_bucket"]["air_pressure_model"]
 
-        self.load_prod_model_log = self.config["train_db_log"]["Load_Prod_Model"]
+        self.load_prod_model_log = self.config["train_db_log"]["load_prod_model"]
 
         self.prod_model_dir = self.config["models_dir"]["prod"]
 

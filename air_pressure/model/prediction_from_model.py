@@ -21,7 +21,7 @@ class Prediction:
 
         self.pred_log = self.config["pred_db_log"]["pred_main"]
 
-        self.model_bucket = self.config["s3_bucket"]["scania_model_bucket"]
+        self.model_bucket = self.config["s3_bucket"]["air_pressure_model_bucket"]
 
         self.input_files_bucket = self.config["s3_bucket"]["inputs_files_bucket"]
 

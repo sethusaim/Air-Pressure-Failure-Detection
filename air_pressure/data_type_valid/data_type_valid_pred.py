@@ -18,7 +18,7 @@ class DB_Operation_Pred:
 
         self.class_name = self.__class__.__name__
 
-        self.pred_data_bucket = self.config["s3_bucket"]["scania_pred_data"]
+        self.pred_data_bucket = self.config["s3_bucket"]["air_pressure_pred_data"]
 
         self.pred_export_csv_file = self.config["export_csv_file"]["pred"]
 

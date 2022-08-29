@@ -17,7 +17,7 @@ class DB_Operation_Train:
 
         self.class_name = self.__class__.__name__
 
-        self.train_data_bucket = self.config["s3_bucket"]["scania_train_data"]
+        self.train_data_bucket = self.config["s3_bucket"]["air_pressure_train_data"]
 
         self.train_export_csv_file = self.config["export_csv_file"]["train"]
 

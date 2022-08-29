@@ -29,10 +29,10 @@ class Pred_Validation:
 
         self.pred_main_log = self.config["pred_db_log"]["pred_main"]
 
-        self.good_data_db_name = self.config["mongodb"]["scania_data_db_name"]
+        self.good_data_db_name = self.config["mongodb"]["air_pressure_data_db_name"]
 
         self.good_data_collection_name = self.config["mongodb"][
-            "scania_pred_data_collection"
+            "air_pressure_pred_data_collection"
         ]
 
         self.log_writer = App_Logger()

@@ -15,7 +15,7 @@ class Data_Transform_Train:
     def __init__(self):
         self.config = read_params()
 
-        self.train_data_bucket = self.config["s3_bucket"]["scania_train_data"]
+        self.train_data_bucket = self.config["s3_bucket"]["air_pressure_train_data"]
 
         self.s3 = S3_Operation()
 

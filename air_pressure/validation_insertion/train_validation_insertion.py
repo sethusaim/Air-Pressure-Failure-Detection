@@ -29,10 +29,10 @@ class Train_Validation:
 
         self.train_main_log = self.config["train_db_log"]["train_main"]
 
-        self.good_data_db_name = self.config["mongodb"]["scania_data_db_name"]
+        self.good_data_db_name = self.config["mongodb"]["air_pressure_data_db_name"]
 
         self.good_data_collection_name = self.config["mongodb"][
-            "scania_train_data_collection"
+            "air_pressure_train_data_collection"
         ]
 
         self.log_writer = App_Logger()
