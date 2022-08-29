@@ -2,9 +2,9 @@ from air_pressure.data_ingestion.data_loader_train import Data_Getter_Train
 from air_pressure.data_preprocessing.clustering import KMeans_Clustering
 from air_pressure.data_preprocessing.preprocessing import Preprocessor
 from air_pressure.mlflow_utils.mlflow_operations import MLFlow_Operation
+from air_pressure.model_finder.tuner import Model_Finder
 from air_pressure.s3_bucket_operations.s3_operations import S3_Operation
 from utils.logger import App_Logger
-from utils.model_utils import Model_Utils
 from utils.read_params import read_params
 
 
@@ -36,7 +36,7 @@ class Train_Model:
 
         self.kmeans_op = KMeans_Clustering(self.model_train_log)
 
-        self.model_utils = Model_Utils()
+        self.tuner = Model_Finder(self.model_train_log)
 
         self.s3 = S3_Operation()
 

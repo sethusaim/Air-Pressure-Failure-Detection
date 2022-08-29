@@ -5,7 +5,6 @@ from sklearn.preprocessing import StandardScaler
 
 from air_pressure.s3_bucket_operations.s3_operations import S3_Operation
 from utils.logger import App_Logger
-from utils.model_utils import Model_Utils
 from utils.read_params import read_params
 
 
@@ -30,8 +29,6 @@ class Preprocessor:
         self.n_components = self.config["pca_model"]["n_components"]
 
         self.input_files_bucket = self.config["s3_bucket"]["input_files"]
-
-        self.model_utils = Model_Utils()
 
         self.s3 = S3_Operation()
 
@@ -319,7 +316,7 @@ class Preprocessor:
 
             pca = PCA(n_components=self.n_components)
 
-            pca_model_name = self.model_utils.get_model_name(pca, self.log_file)
+            pca_model_name = pca.__class__.__name__
 
             self.log_writer.log(
                 self.log_file,

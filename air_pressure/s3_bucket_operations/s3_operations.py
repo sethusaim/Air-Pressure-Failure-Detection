@@ -8,7 +8,6 @@ import pandas as pd
 from botocore.exceptions import ClientError
 
 from utils.logger import App_Logger
-from utils.model_utils import Model_Utils
 from utils.read_params import read_params
 
 
@@ -27,8 +26,6 @@ class S3_Operation:
         self.config = read_params()
 
         self.class_name = self.__class__.__name__
-
-        self.model_utils = Model_Utils()
 
         self.file_format = self.config["model_utils"]["save_format"]
 
@@ -726,7 +723,7 @@ class S3_Operation:
         )
 
         try:
-            model_name = self.model_utils.get_model_name(model, log_file)
+            model_name = model.__class__.__name__
 
             func = (
                 lambda: model_name + self.file_format
