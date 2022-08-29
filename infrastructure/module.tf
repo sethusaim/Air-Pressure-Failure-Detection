@@ -11,7 +11,7 @@ module "mongodb_database" {
 }
 
 module "ecr_repo" {
-  source = "./air_pressure_ecr"
+  source = "./ecr"
 }
 
 module "io_files_bucket" {
