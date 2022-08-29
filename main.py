@@ -45,7 +45,7 @@ async def index(request: Request):
 @app.get("/train")
 async def trainRouteClient():
     try:
-        train_val = Train_Validation(config["s3_bucket"]["scania_raw_data"])
+        train_val = Train_Validation(config["s3_bucket"]["air_pressure_raw_data"])
 
         train_val.training_validation()
 
@@ -68,7 +68,7 @@ async def trainRouteClient():
 @app.get("/predict")
 async def predictRouteClient():
     try:
-        pred_val = Pred_Validation(config["s3_bucket"]["scania_raw_data"])
+        pred_val = Pred_Validation(config["s3_bucket"]["air_pressure_raw_data"])
 
         pred_val.prediction_validation()
 
