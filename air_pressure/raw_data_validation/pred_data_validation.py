@@ -2,7 +2,8 @@ import re
 
 from air_pressure.s3_bucket_operations.s3_operations import S3_Operation
 from utils.logger import App_Logger
-from utils.read_params import read_params
+from utils.main_utils import Main_Utils
+from utils.read_params import get_log_dic, read_params
 
 
 class Raw_Pred_Data_Validation:
@@ -14,42 +15,41 @@ class Raw_Pred_Data_Validation:
     Revisions   :   Moved to setup to cloud 
     """
 
-    def __init__(self, raw_data_bucket):
+    def __init__(self):
         self.config = read_params()
 
-        self.raw_data_bucket = raw_data_bucket
-
+        self.raw_data_bucket = self.config["s3_bucket"]["air_pressure_raw_data_bucket"]
         self.log_writer = App_Logger()
-
-        self.class_name = self.__class__.__name__
 
         self.s3 = S3_Operation()
 
-        self.pred_data_bucket = self.config["s3_bucket"]["air_pressure_pred_data"]
+        self.utils = Main_Utils()
 
         self.input_files_bucket = self.config["s3_bucket"]["input_files_bucket"]
 
+        self.pred_data_bucket = self.config["s3_bucket"][
+            "air_pressure_pred_data_bucket"
+        ]
+
         self.raw_pred_data_dir = self.config["data"]["raw_data"]["pred_batch"]
-
-        self.pred_schema_file = self.config["schema_file"]["pred_schema_file"]
-
-        self.regex_file = self.config["regex_file"]
-
-        self.pred_schema_log = self.config["pred_db_log"]["values_from_schema"]
 
         self.good_pred_data_dir = self.config["data"]["pred"]["good_data_dir"]
 
         self.bad_pred_data_dir = self.config["data"]["pred"]["bad_data_dir"]
 
-        self.pred_gen_log = self.config["pred_db_log"]["general"]
+        self.pred_schema_file = self.config["schema_file"]["pred_schema_file"]
 
-        self.pred_name_valid_log = self.config["pred_db_log"]["name_validation"]
+        self.regex_file = self.config["regex_file"]
 
-        self.pred_col_valid_log = self.config["pred_db_log"]["col_validation"]
+        self.pred_schema_log = self.config["log"]["pred_values_from_schema"]
 
-        self.pred_missing_value_log = self.config["pred_db_log"][
-            "missing_values_in_col"
-        ]
+        self.pred_gen_log = self.config["log"]["pred_general"]
+
+        self.pred_name_valid_log = self.config["log"]["pred_name_validation"]
+
+        self.pred_col_valid_log = self.config["log"]["pred_col_validation"]
+
+        self.pred_missing_value_log = self.config["log"]["pred_missing_values_in_col"]
 
     def values_from_schema(self):
         """
@@ -62,12 +62,15 @@ class Raw_Pred_Data_Validation:
         Version     :   1.2
         Revisions   :   moved setup to cloud
         """
-        method_name = self.values_from_schema.__name__
+        log_dic = get_log_dic(
+            self.__class__.__name__,
+            self.values_from_schema.__name__,
+            __file__,
+            self.pred_schema_log,
+        )
 
         try:
-            self.log_writer.start_log(
-                "start", self.class_name, method_name, self.pred_schema_log,
-            )
+            self.log_writer.start_log("start", **log_dic)
 
             dic = self.s3.read_json(
                 self.pred_schema_file, self.input_files_bucket, self.pred_schema_log,
@@ -90,18 +93,12 @@ class Raw_Pred_Data_Validation:
                 + "\n"
             )
 
-            self.log_writer.log(
-                self.pred_schema_log, message,
-            )
+            self.log_writer.log(message, **log_dic)
 
-            self.log_writer.start_log(
-                "exit", self.class_name, method_name, self.pred_schema_log,
-            )
+            self.log_writer.start_log("exit", **log_dic)
 
         except Exception as e:
-            self.log_writer.exception_log(
-                e, self.class_name, method_name, self.pred_schema_log,
-            )
+            self.log_writer.exception_log(e, **log_dic)
 
         return (
             LengthOfDateStampInFile,
@@ -121,66 +118,28 @@ class Raw_Pred_Data_Validation:
         Version     :   1.2
         Revisions   :   moved setup to cloud
         """
-        method_name = self.get_regex_pattern.__name__
+        log_dic = get_log_dic(
+            self.__class__.__name__,
+            self.get_regex_pattern.__name__,
+            __file__,
+            self.pred_gen_log,
+        )
 
         try:
-            self.log_writer.start_log(
-                "start", self.class_name, method_name, self.pred_gen_log,
-            )
+            self.log_writer.start_log("start", **log_dic)
 
             regex = self.s3.read_text(
                 self.regex_file, self.input_files_bucket, self.pred_gen_log,
             )
 
-            self.log_writer.log(
-                self.pred_gen_log, f"Got {regex} pattern",
-            )
+            self.log_writer.log(f"Got {regex} pattern", **log_dic)
 
-            self.log_writer.start_log(
-                "exit", self.class_name, method_name, self.pred_gen_log,
-            )
+            self.log_writer.start_log("exit", **log_dic)
 
             return regex
 
         except Exception as e:
-            self.log_writer.exception_log(
-                e, self.class_name, method_name, self.pred_gen_log,
-            )
-
-    def create_dirs_for_good_bad_data(self, log_file):
-        """
-        Method Name :   create_dirs_for_good_bad_data
-        Description :   This method creates folders for good and bad data in s3 bucket
-
-        Output      :   Good and bad folders are created in s3 bucket
-        On Failure  :   Write an exception log and then raise an exception
-
-        Version     :   1.2
-        Revisions   :   moved setup to cloud
-        """
-        method_name = self.create_dirs_for_good_bad_data.__name__
-
-        self.log_writer.start_log(
-            "start", self.class_name, method_name, log_file,
-        )
-
-        try:
-            self.s3.create_folder(
-                self.good_pred_data_dir, self.pred_data_bucket, log_file,
-            )
-
-            self.s3.create_folder(
-                self.bad_pred_data_dir, self.pred_data_bucket, log_file,
-            )
-
-            self.log_writer.start_log(
-                "exit", self.class_name, method_name, log_file,
-            )
-
-        except Exception as e:
-            self.log_writer.exception_log(
-                e, self.class_name, method_name, log_file,
-            )
+            self.log_writer.exception_log(e, **log_dic)
 
     def validate_raw_fname(
         self, regex, LengthOfDateStampInFile, LengthOfTimeStampInFile
@@ -195,24 +154,26 @@ class Raw_Pred_Data_Validation:
         Version     :   1.2
         Revisions   :   moved setup to cloud
         """
-        method_name = self.validate_raw_fname.__name__
-
-        self.log_writer.start_log(
-            "start", self.class_name, method_name, self.pred_name_valid_log,
+        log_dic = get_log_dic(
+            self.__class__.__name__,
+            self.validate_raw_fname.__name__,
+            __file__,
+            self.pred_name_valid_log,
         )
 
+        self.log_writer.start_log("start", **log_dic)
+
         try:
-            self.create_dirs_for_good_bad_data(self.pred_name_valid_log)
+            self.utils.create_dirs_for_good_bad_data(self.pred_name_valid_log)
 
             onlyfiles = self.s3.get_files_from_folder(
-                self.raw_data_bucket, self.raw_pred_data_dir, self.pred_name_valid_log,
+                self.raw_pred_data_dir, self.raw_data_bucket, self.pred_name_valid_log
             )
 
             pred_batch_files = [f.split("/")[1] for f in onlyfiles]
 
             self.log_writer.log(
-                self.pred_name_valid_log,
-                "Got Prediction files with absolute file name",
+                "Got prediction files with absolute file name", **log_dic
             )
 
             for fname in pred_batch_files:
@@ -222,9 +183,7 @@ class Raw_Pred_Data_Validation:
 
                 bad_data_pred_fname = self.bad_pred_data_dir + "/" + fname
 
-                self.log_writer.log(
-                    self.pred_name_valid_log, "Created raw,good and bad data file name",
-                )
+                self.log_writer.log("Created raw,good and bad data file name", *log_dic)
 
                 if re.match(regex, fname):
                     splitAtDot = re.split(".csv", fname)
@@ -235,7 +194,7 @@ class Raw_Pred_Data_Validation:
                         if len(splitAtDot[2]) == LengthOfTimeStampInFile:
                             self.s3.copy_data(
                                 raw_data_pred_fname,
-                                self.pred_data_bucket,
+                                self.raw_data_bucket,
                                 good_data_pred_fname,
                                 self.pred_data_bucket,
                                 self.pred_name_valid_log,
@@ -244,7 +203,7 @@ class Raw_Pred_Data_Validation:
                         else:
                             self.s3.copy_data(
                                 raw_data_pred_fname,
-                                self.pred_data_bucket,
+                                self.raw_data_bucket,
                                 bad_data_pred_fname,
                                 self.pred_data_bucket,
                                 self.pred_name_valid_log,
@@ -253,7 +212,7 @@ class Raw_Pred_Data_Validation:
                     else:
                         self.s3.copy_data(
                             raw_data_pred_fname,
-                            self.pred_data_bucket,
+                            self.raw_data_bucket,
                             bad_data_pred_fname,
                             self.pred_data_bucket,
                             self.pred_name_valid_log,
@@ -261,20 +220,16 @@ class Raw_Pred_Data_Validation:
                 else:
                     self.s3.copy_data(
                         raw_data_pred_fname,
-                        self.pred_data_bucket,
+                        self.raw_data_bucket,
                         bad_data_pred_fname,
                         self.pred_data_bucket,
                         self.pred_name_valid_log,
                     )
 
-            self.log_writer.start_log(
-                "exit", self.class_name, method_name, self.pred_name_valid_log,
-            )
+            self.log_writer.start_log("exit", **log_dic)
 
         except Exception as e:
-            self.log_writer.exception_log(
-                e, self.class_name, method_name, self.pred_name_valid_log,
-            )
+            self.log_writer.exception_log(e, **log_dic)
 
     def validate_col_length(self, NumberofColumns):
         """
@@ -287,23 +242,26 @@ class Raw_Pred_Data_Validation:
         Version     :   1.2
         Revisions   :   moved setup to cloud
         """
-        method_name = self.validate_col_length.__name__
-
-        self.log_writer.start_log(
-            "start", self.class_name, method_name, self.pred_col_valid_log,
+        log_dic = get_log_dic(
+            self.__class__.__name__,
+            self.validate_col_length.__name__,
+            __file__,
+            self.pred_col_valid_log,
         )
+
+        self.log_writer.start_log("start", **log_dic)
 
         try:
             lst = self.s3.read_csv_from_folder(
                 self.good_pred_data_dir, self.pred_data_bucket, self.pred_col_valid_log,
             )
 
-            for idx, f in enumerate(lst):
-                df = f[idx][0]
+            for _, f in enumerate(lst):
+                df = f[0]
 
-                file = f[idx][1]
+                file = f[1]
 
-                abs_f = f[idx][2]
+                abs_f = f[2]
 
                 if file.endswith(".csv"):
                     if df.shape[1] == NumberofColumns:
@@ -323,14 +281,10 @@ class Raw_Pred_Data_Validation:
                 else:
                     pass
 
-            self.log_writer.start_log(
-                "exit", self.class_name, method_name, self.pred_col_valid_log,
-            )
+            self.log_writer.start_log("exit", **log_dic)
 
         except Exception as e:
-            self.log_writer.exception_log(
-                e, self.class_name, method_name, self.pred_col_valid_log,
-            )
+            self.log_writer.exception_log(e, **log_dic)
 
     def validate_missing_values_in_col(self):
         """
@@ -343,11 +297,14 @@ class Raw_Pred_Data_Validation:
         Version     :   1.2
         Revisions   :   moved setup to cloud
         """
-        method_name = self.validate_missing_values_in_col.__name__
-
-        self.log_writer.start_log(
-            "start", self.class_name, method_name, self.pred_missing_value_log,
+        log_dic = get_log_dic(
+            self.__class__.__name__,
+            self.validate_missing_values_in_col.__name__,
+            __file__,
+            self.pred_missing_value_log,
         )
+
+        self.log_writer.start_log("start", **log_dic)
 
         try:
             lst = self.s3.read_csv_from_folder(
@@ -356,12 +313,12 @@ class Raw_Pred_Data_Validation:
                 self.pred_missing_value_log,
             )
 
-            for idx, f in lst:
-                df = f[idx][0]
+            for _, f in enumerate(lst):
+                df = f[0]
 
-                file = f[idx][1]
+                file = f[1]
 
-                abs_f = f[idx][2]
+                abs_f = f[2]
 
                 if abs_f.endswith(".csv"):
                     count = 0
@@ -396,11 +353,7 @@ class Raw_Pred_Data_Validation:
                 else:
                     pass
 
-                self.log_writer.start_log(
-                    "exit", self.class_name, method_name, self.pred_missing_value_log,
-                )
+                self.log_writer.start_log("exit", **log_dic)
 
         except Exception as e:
-            self.log_writer.exception_log(
-                e, self.class_name, method_name, self.pred_missing_value_log,
-            )
+            self.log_writer.exception_log(e, **log_dic)

@@ -1,11 +1,10 @@
-from air_pressure.data_transform.data_transformation_train import \
-    Data_Transform_Train
-from air_pressure.data_type_valid.data_type_valid_train import \
-    DB_Operation_Train
-from air_pressure.raw_train_data_validation.train_data_validation import \
-    Raw_Train_Data_Validation
+from air_pressure.data_transform.data_transformation_train import Data_Transform_Train
+from air_pressure.data_type_valid.data_type_valid_train import DB_Operation_Train
+from air_pressure.raw_data_validation.train_data_validation import (
+    Raw_Train_Data_Validation,
+)
 from utils.logger import App_Logger
-from utils.read_params import read_params
+from utils.read_params import get_log_dic, read_params
 
 
 class Train_Validation:
@@ -17,8 +16,8 @@ class Train_Validation:
     Revisions   :   Moved to setup to cloud 
     """
 
-    def __init__(self, bucket):
-        self.raw_data = Raw_Train_Data_Validation(bucket)
+    def __init__(self):
+        self.raw_data = Raw_Train_Data_Validation()
 
         self.data_transform = Data_Transform_Train()
 
@@ -26,9 +25,7 @@ class Train_Validation:
 
         self.config = read_params()
 
-        self.class_name = self.__class__.__name__
-
-        self.train_main_log = self.config["train_db_log"]["train_main"]
+        self.train_main_log = self.config["log"]["train_main"]
 
         self.good_data_db_name = self.config["mongodb"]["air_pressure_data_db_name"]
 
@@ -49,17 +46,20 @@ class Train_Validation:
         Version     :   1.2
         Revisions   :   moved setup to cloud
         """
-        method_name = self.training_validation.__name__
+        log_dic = get_log_dic(
+            self.__class__.__name__,
+            self.training_validation.__name__,
+            __file__,
+            self.train_main_log,
+        )
 
         try:
-            self.log_writer.start_log(
-                "start", self.class_name, method_name, self.train_main_log,
-            )
+            self.log_writer.start_log("start", **log_dic)
 
             (
                 LengthOfDateStampInFile,
                 LengthOfTimeStampInFile,
-                column_names,
+                _,
                 noofcolumns,
             ) = self.raw_data.values_from_schema()
 
@@ -73,39 +73,27 @@ class Train_Validation:
 
             self.raw_data.validate_missing_values_in_col()
 
-            self.log_writer.log(
-                self.train_main_log, "Raw Data Validation Completed !!",
-            )
+            self.log_writer.log("Raw Data Validation Completed !!", **log_dic)
 
-            self.log_writer.log(
-                self.train_main_log, "Starting Data Transformation",
-            )
+            self.log_writer.log("Starting Data Transformation", **log_dic)
 
             self.data_transform.add_quotes_to_string()
 
-            self.log_writer.log(
-                self.train_main_log, "Data Transformation completed !!",
-            )
+            self.log_writer.log("Data Transformation completed !!", **log_dic)
 
             self.db_operation.insert_good_data_as_record(
-                db_name=self.good_data_db_name,
-                collection_name=self.good_data_collection_name,
+                self.good_data_db_name, self.good_data_collection_name
             )
 
             self.log_writer.log(
-                self.train_main_log, "Data type validation Operation completed !!",
+                "Data type validation Operation completed !!", **log_dic
             )
 
             self.db_operation.export_collection_to_csv(
-                db_name=self.good_data_db_name,
-                collection_name=self.good_data_collection_name,
+                self.good_data_db_name, self.good_data_collection_name
             )
 
-            self.log_writer.start_log(
-                "exit", self.class_name, method_name, self.train_main_log,
-            )
+            self.log_writer.start_log("exit", **log_dic)
 
         except Exception as e:
-            self.log_writer.exception_log(
-                e, self.class_name, method_name, self.train_main_log,
-            )
+            self.log_writer.exception_log(e, **log_dic)

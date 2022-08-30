@@ -1,6 +1,6 @@
 from air_pressure.s3_bucket_operations.s3_operations import S3_Operation
 from utils.logger import App_Logger
-from utils.read_params import read_params
+from utils.read_params import get_log_dic, read_params
 
 
 class Data_Getter_Pred:
@@ -24,8 +24,6 @@ class Data_Getter_Pred:
 
         self.log_writer = App_Logger()
 
-        self.class_name = self.__class__.__name__
-
     def get_data(self):
         """
         Method Name :   get_data
@@ -37,24 +35,20 @@ class Data_Getter_Pred:
         Version     :   1.2
         Revisions   :   moved setup to cloud
         """
-        method_name = self.get_data.__name__
-
-        self.log_writer.start_log(
-            "start", self.class_name, method_name, self.log_file,
+        log_dic = get_log_dic(
+            self.__class__.__name__, self.get_data.__name__, __file__, self.log_file
         )
+
+        self.log_writer.start_log("start", **log_dic)
 
         try:
             df = self.s3.read_csv(
                 self.prediction_file, self.input_files_bucket, self.log_file,
             )
 
-            self.log_writer.start_log(
-                "exit", self.class_name, method_name, self.log_file,
-            )
+            self.log_writer.start_log("exit", **log_dic)
 
             return df
 
         except Exception as e:
-            self.log_writer.exception_log(
-                e, self.class_name, method_name, self.log_file,
-            )
+            self.log_writer.exception_log(e, **log_dic)

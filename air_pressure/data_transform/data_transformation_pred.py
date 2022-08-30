@@ -1,11 +1,11 @@
 from air_pressure.s3_bucket_operations.s3_operations import S3_Operation
 from utils.logger import App_Logger
-from utils.read_params import read_params
+from utils.read_params import get_log_dic, read_params
 
 
 class Data_Transform_Pred:
     """
-    Description :  This class shall be used for transforming the prediction batch data before loading it in Database!!.
+    Description :  This class shall be used for transforming the preding batch data before loading it in Database!!.
     
     
     Version     :   1.2
@@ -15,7 +15,9 @@ class Data_Transform_Pred:
     def __init__(self):
         self.config = read_params()
 
-        self.pred_data_bucket = self.config["s3_bucket"]["air_pressure_pred_data"]
+        self.pred_data_bucket = self.config["s3_bucket"][
+            "air_pressure_pred_data_bucket"
+        ]
 
         self.s3 = S3_Operation()
 
@@ -23,9 +25,7 @@ class Data_Transform_Pred:
 
         self.good_pred_data_dir = self.config["data"]["pred"]["good_data_dir"]
 
-        self.class_name = self.__class__.__name__
-
-        self.pred_data_transform_log = self.config["pred_db_log"]["data_transform"]
+        self.pred_data_transform_log = self.config["log"]["pred_data_transform"]
 
     def add_quotes_to_string(self):
         """
@@ -38,26 +38,28 @@ class Data_Transform_Pred:
         Version     :   1.2
         Revisions   :   moved setup to cloud
         """
-        method_name = self.add_quotes_to_string.__name__
-
-        self.log_writer.start_log(
-            "start", self.class_name, method_name, self.pred_data_transform_log,
+        log_dic = get_log_dic(
+            self.__class__.__name__,
+            self.add_quotes_to_string.__name__,
+            __file__,
+            self.pred_data_transform_log,
         )
 
+        self.log_writer.start_log("start", **log_dic)
+
         try:
-            lst = self.s3.read_csv(
-                self.pred_data_bucket,
+            lst = self.s3.read_csv_from_folder(
                 self.good_pred_data_dir,
+                self.pred_data_bucket,
                 self.pred_data_transform_log,
-                folder=True,
             )
 
-            for idx, t_pdf in enumerate(lst):
-                df = t_pdf[idx][1]
+            for _, t_pdf in enumerate(lst):
+                df = t_pdf[0]
 
-                file = t_pdf[idx][2]
+                file = t_pdf[1]
 
-                abs_f = t_pdf[idx][3]
+                abs_f = t_pdf[2]
 
                 df["class"] = df["class"].apply(lambda x: "'" + str(x) + "'")
 
@@ -67,23 +69,17 @@ class Data_Transform_Pred:
                     if count != 0:
                         df[column] = df[column].replace("na", "'na'")
 
-                self.log_writer.log(
-                    self.pred_data_transform_log, f"Quotes added for the file {file}",
-                )
+                self.log_writer.log(f"Quotes added for the file {file}", **log_dic)
 
                 self.s3.upload_df_as_csv(
                     df,
                     abs_f,
-                    self.pred_data_bucket,
                     file,
+                    self.pred_data_bucket,
                     self.pred_data_transform_log,
                 )
 
-            self.log_writer.start_log(
-                "exit", self.class_name, method_name, self.pred_data_transform_log,
-            )
+            self.log_writer.start_log("exit", **log_dic)
 
         except Exception as e:
-            self.log_writer.exception_log(
-                e, self.class_name, method_name, self.pred_data_transform_log,
-            )
+            self.log_writer.exception_log(e, **log_dic)

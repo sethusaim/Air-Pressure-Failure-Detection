@@ -5,7 +5,7 @@ import pandas as pd
 from pymongo import MongoClient
 
 from utils.logger import App_Logger
-from utils.read_params import read_params
+from utils.read_params import get_log_dic, read_params
 
 
 class MongoDB_Operation:
@@ -19,8 +19,6 @@ class MongoDB_Operation:
 
     def __init__(self):
         self.config = read_params()
-
-        self.class_name = self.__class__.__name__
 
         self.DB_URL = os.environ["MONGODB_URL"]
 
@@ -39,29 +37,23 @@ class MongoDB_Operation:
         Version     :   1.2
         Revisions   :   moved setup to cloud
         """
-        method_name = self.get_database.__name__
-
-        self.log_writer.start_log(
-            "start", self.class_name, method_name, log_file,
+        log_dic = get_log_dic(
+            self.__class__.__name__, self.get_database.__name__, __file__, log_file
         )
+
+        self.log_writer.start_log("start", **log_dic)
 
         try:
             db = self.client[db_name]
 
-            self.log_writer.log(
-                log_file, f"Created {db_name} database in MongoDB",
-            )
+            self.log_writer.log(f"Created {db_name} database in MongoDB", **log_dic)
 
-            self.log_writer.start_log(
-                "exit", self.class_name, method_name, log_file,
-            )
+            self.log_writer.start_log("exit", **log_dic)
 
             return db
 
         except Exception as e:
-            self.log_writer.exception_log(
-                e, self.class_name, method_name, log_file,
-            )
+            self.log_writer.exception_log(e, **log_dic)
 
     def get_collection(self, database, collection_name, log_file):
         """
@@ -74,29 +66,25 @@ class MongoDB_Operation:
         Version     :   1.2
         Revisions   :   moved setup to cloud
         """
-        method_name = self.get_collection.__name__
-
-        self.log_writer.start_log(
-            "start", self.class_name, method_name, log_file,
+        log_dic = get_log_dic(
+            self.__class__.__name__, self.get_collection.__name__, __file__, log_file
         )
+
+        self.log_writer.start_log("start", **log_dic)
 
         try:
             collection = database[collection_name]
 
             self.log_writer.log(
-                log_file, f"Created {collection_name} collection in mongodb",
+                f"Created {collection_name} collection in mongodb", **log_dic
             )
 
-            self.log_writer.start_log(
-                "exit", self.class_name, method_name, log_file,
-            )
+            self.log_writer.start_log("exit", **log_dic)
 
             return collection
 
         except Exception as e:
-            self.log_writer.exception_log(
-                e, self.class_name, method_name, log_file,
-            )
+            self.log_writer.exception_log(e, **log_dic)
 
     def get_collection_as_dataframe(self, db_name, collection_name, log_file):
         """
@@ -110,11 +98,14 @@ class MongoDB_Operation:
         Written by  :   iNeuron Intelligence
         Revisions   :   moved setup to cloud
         """
-        method_name = self.get_collection_as_dataframe.__name__
-
-        self.log_writer.start_log(
-            "start", self.class_name, method_name, log_file,
+        log_dic = get_log_dic(
+            self.__class__.__name__,
+            self.get_collection_as_dataframe.__name__,
+            __file__,
+            log_file,
         )
+
+        self.log_writer.start_log("start", **log_dic)
 
         try:
             database = self.get_database(db_name, log_file)
@@ -126,20 +117,14 @@ class MongoDB_Operation:
             if "_id" in df.columns.to_list():
                 df = df.drop(columns=["_id"], axis=1)
 
-            self.log_writer.log(
-                log_file, "Converted collection to dataframe",
-            )
+            self.log_writer.log("Converted collection to dataframe", **log_dic)
 
-            self.log_writer.start_log(
-                "exit", self.class_name, method_name, log_file,
-            )
+            self.log_writer.start_log("exit", *log_dic)
 
             return df
 
         except Exception as e:
-            self.log_writer.exception_log(
-                e, self.class_name, method_name, log_file,
-            )
+            self.log_writer.exception_log(e, **log_dic)
 
     def insert_dataframe_as_record(
         self, data_frame, db_name, collection_name, log_file
@@ -154,34 +139,31 @@ class MongoDB_Operation:
         Version     :   1.2
         Revisions   :   moved setup to cloud
         """
-        method_name = self.insert_dataframe_as_record.__name__
-
-        self.log_writer.start_log(
-            "start", self.class_name, method_name, log_file,
+        log_dic = get_log_dic(
+            self.__class__.__name__,
+            self.insert_dataframe_as_record.__name__,
+            __file__,
+            log_file,
         )
+
+        self.log_writer.start_log("start", **log_dic)
 
         try:
             records = json.loads(data_frame.T.to_json()).values()
 
-            self.log_writer.log(
-                log_file, f"Converted dataframe to json records",
-            )
+            self.log_writer.log(f"Converted dataframe to json records", **log_dic)
 
             database = self.get_database(db_name, log_file)
 
             collection = database.get_collection(collection_name)
 
-            self.log_writer.log(log_file, "Inserting records to MongoDB")
+            self.log_writer.log("Inserting records to MongoDB", **log_dic)
 
             collection.insert_many(records)
 
-            self.log_writer.log(log_file, "Inserted records to MongoDB")
+            self.log_writer.log("Inserted records to MongoDB", **log_dic)
 
-            self.log_writer.start_log(
-                "exit", self.class_name, method_name, log_file,
-            )
+            self.log_writer.start_log("exit", **log_dic)
 
         except Exception as e:
-            self.log_writer.exception_log(
-                e, self.class_name, method_name, log_file,
-            )
+            self.log_writer.exception_log(e, **log_dic)

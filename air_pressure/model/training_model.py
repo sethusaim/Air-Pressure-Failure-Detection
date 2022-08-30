@@ -5,7 +5,7 @@ from air_pressure.mlflow_utils.mlflow_operations import MLFlow_Operation
 from air_pressure.model_finder.tuner import Model_Finder
 from air_pressure.s3_bucket_operations.s3_operations import S3_Operation
 from utils.logger import App_Logger
-from utils.read_params import read_params
+from utils.read_params import get_log_dic, read_params
 
 
 class Train_Model:
@@ -22,11 +22,9 @@ class Train_Model:
 
         self.config = read_params()
 
-        self.model_train_log = self.config["train_db_log"]["train_model"]
+        self.model_train_log = self.config["log"]["model_training"]
 
         self.target_col = self.config["target_col"]
-
-        self.class_name = self.__class__.__name__
 
         self.mlflow_op = MLFlow_Operation(self.model_train_log)
 
@@ -53,21 +51,26 @@ class Train_Model:
         
         Revisions   :   moved setup to cloud
         """
-        method_name = self.training_model.__name__
-
-        self.log_writer.start_log(
-            "start", self.class_name, method_name, self.model_train_log,
+        log_dic = get_log_dic(
+            self.__class__.__name__,
+            self.training_model.__name__,
+            __file__,
+            self.model_train_log,
         )
+
+        self.log_writer.start_log("start", **log_dic)
 
         try:
             data = self.data_getter_train.get_data()
 
             data = self.preprocessor.replace_invalid_values(data)
 
-            is_null_present = self.preprocessor.is_null_present(X)
+            data = self.preprocessor.encode_target_cols(data)
+
+            is_null_present = self.preprocessor.is_null_present(data)
 
             if is_null_present:
-                data = self.preprocessor.impute_missing_values(X)
+                data = self.preprocessor.impute_missing_values(data)
 
             X, Y = self.preprocessor.separate_label_feature(data, self.target_col)
 
@@ -87,11 +90,11 @@ class Train_Model:
                 cluster_label = cluster_data["Labels"]
 
                 self.log_writer.log(
-                    self.model_train_log,
                     "Seprated cluster features and cluster label for the cluster data",
+                    **log_dic
                 )
 
-                self.model_utils.train_and_log_models(
+                self.tuner.train_and_log_models(
                     cluster_features,
                     cluster_label,
                     self.model_train_log,
@@ -99,21 +102,13 @@ class Train_Model:
                     kmeans=kmeans_model,
                 )
 
-            self.log_writer.log(
-                self.model_train_log, "Successful End of Training",
-            )
+            self.log_writer.log("Successful End of Training", **log_dic)
 
-            self.log_writer.start_log(
-                "exit", self.class_name, method_name, self.model_train_log,
-            )
+            self.log_writer.start_log("exit", **log_dic)
 
             return number_of_clusters
 
         except Exception as e:
-            self.log_writer.log(
-                self.model_train_log, "Unsuccessful End of Training",
-            )
+            self.log_writer.log("Unsuccessful End of Training", **log_dic)
 
-            self.log_writer.exception_log(
-                e, self.class_name, method_name, self.model_train_log,
-            )
+            self.log_writer.exception_log(e, **log_dic)

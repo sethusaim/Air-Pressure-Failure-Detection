@@ -15,7 +15,6 @@ from air_pressure.validation_insertion.prediction_validation_insertion import (
 from air_pressure.validation_insertion.train_validation_insertion import (
     Train_Validation,
 )
-from utils.main_utils import upload_logs
 from utils.read_params import read_params
 
 app = FastAPI()
@@ -45,7 +44,7 @@ async def index(request: Request):
 @app.get("/train")
 async def trainRouteClient():
     try:
-        train_val = Train_Validation(config["s3_bucket"]["air_pressure_raw_data"])
+        train_val = Train_Validation()
 
         train_val.training_validation()
 
@@ -57,7 +56,7 @@ async def trainRouteClient():
 
         load_prod_model.load_production_model()
 
-        upload_logs("logs", config["s3_bucket"]["input_files"])
+        # upload_logs("logs", config["s3_bucket"]["logs"])
 
         return Response("Training successfull!!")
 

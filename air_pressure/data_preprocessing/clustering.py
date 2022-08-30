@@ -4,7 +4,7 @@ from sklearn.cluster import KMeans
 
 from air_pressure.s3_bucket_operations.s3_operations import S3_Operation
 from utils.logger import App_Logger
-from utils.read_params import read_params
+from utils.read_params import get_log_dic, read_params
 
 
 class KMeans_Clustering:
@@ -22,7 +22,7 @@ class KMeans_Clustering:
 
         self.input_files_bucket = self.config["s3_bucket"]["input_files_bucket"]
 
-        self.model_bucket = self.config["s3_bucket"]["air_pressure_model"]
+        self.model_bucket = self.config["s3_bucket"]["air_pressure_model_bucket"]
 
         self.random_state = self.config["base"]["random_state"]
 
@@ -42,8 +42,6 @@ class KMeans_Clustering:
 
         self.log_writer = App_Logger()
 
-        self.class_name = self.__class__.__name__
-
     def elbow_plot(self, data):
         """
         Method Name :   elbow_plot
@@ -55,11 +53,11 @@ class KMeans_Clustering:
         Version     :   1.2
         Revisions   :   Moved to setup to cloud 
         """
-        method_name = self.elbow_plot.__name__
-
-        self.log_writer.start_log(
-            "start", self.class_name, method_name, self.log_file,
+        log_dic = get_log_dic(
+            self.__class__.__name__, self.elbow_plot.__name__, __file__, self.log_file
         )
+
+        self.log_writer.start_log("start", **log_dic)
 
         try:
             wcss = []
@@ -84,7 +82,7 @@ class KMeans_Clustering:
             plt.savefig(self.elbow_plot_file)
 
             self.log_writer.log(
-                self.log_file, "Saved elbow_plot fig and local copy is created",
+                "Saved elbow_plot fig and local copy is created", **log_dic
             )
 
             self.s3.upload_file(
@@ -102,20 +100,15 @@ class KMeans_Clustering:
             )
 
             self.log_writer.log(
-                self.log_file,
-                f"The optimum number of clusters is {str(self.kn.knee)}.",
+                f"The optimum number of clusters is {str(self.kn.knee)}", **log_dic
             )
 
-            self.log_writer.start_log(
-                "exit", self.class_name, method_name, self.log_file,
-            )
+            self.log_writer.start_log("exit", **log_dic)
 
             return self.kn.knee
 
         except Exception as e:
-            self.log_writer.exception_log(
-                e, self.class_name, method_name, self.log_file,
-            )
+            self.log_writer.exception_log(e, **log_dic)
 
     def create_clusters(self, data, number_of_clusters):
         """
@@ -128,15 +121,18 @@ class KMeans_Clustering:
         Version     :   1.2
         Revisions   :   Moved to setup to cloud 
         """
-        method_name = self.create_clusters.__name__
-
-        self.log_writer.start_log(
-            "start", self.class_name, method_name, self.log_file,
+        log_dic = get_log_dic(
+            self.__class__.__name__,
+            self.create_clusters.__name__,
+            __file__,
+            self.log_file,
         )
 
-        try:
-            self.data = data
+        self.log_writer.start_log("start", **log_dic)
 
+        self.data = data
+
+        try:
             self.kmeans = KMeans(
                 n_clusters=number_of_clusters,
                 init=self.kmeans_init,
@@ -152,16 +148,12 @@ class KMeans_Clustering:
             self.data["Cluster"] = self.y_kmeans
 
             self.log_writer.log(
-                self.log_file, f"Successfully created {str(self.kn.knee)} clusters",
+                f"Successfully created {str(self.kn.knee)} clusters", **log_dic
             )
 
-            self.log_writer.start_log(
-                "exit", self.class_name, method_name, self.log_file,
-            )
+            self.log_writer.start_log("exit", **log_dic)
 
             return self.data, self.kmeans
 
         except Exception as e:
-            self.log_writer.exception_log(
-                e, self.class_name, method_name, self.log_file,
-            )
+            self.log_writer.exception_log(e, **log_dic)

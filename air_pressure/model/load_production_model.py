@@ -1,7 +1,7 @@
 from air_pressure.mlflow_utils.mlflow_operations import MLFlow_Operation
 from air_pressure.s3_bucket_operations.s3_operations import S3_Operation
 from utils.logger import App_Logger
-from utils.read_params import read_params
+from utils.read_params import get_log_dic, read_params
 
 
 class Load_Prod_Model:
@@ -18,17 +18,15 @@ class Load_Prod_Model:
 
         self.config = read_params()
 
-        self.class_name = self.__class__.__name__
-
         self.num_clusters = num_clusters
 
-        self.model_bucket = self.config["s3_bucket"]["air_pressure_model"]
+        self.model_bucket = self.config["s3_bucket"]["air_pressure_model_bucket"]
 
-        self.load_prod_model_log = self.config["train_db_log"]["load_prod_model"]
+        self.load_prod_model_log = self.config["log"]["load_prod_model"]
 
-        self.prod_model_dir = self.config["models_dir"]["prod"]
+        self.prod_model_dir = self.config["model_dir"]["prod"]
 
-        self.stag_model_dir = self.config["models_dir"]["stag"]
+        self.stag_model_dir = self.config["model_dir"]["stag"]
 
         self.exp_name = self.config["mlflow_config"]["experiment_name"]
 
@@ -48,11 +46,14 @@ class Load_Prod_Model:
         
         Revisions   :   moved setup to cloud
         """
-        method_name = self.create_folders_for_prod_and_stag.__name__
-
-        self.log_writer.start_log(
-            "start", self.class_name, method_name, log_file,
+        log_dic = get_log_dic(
+            self.__class__.__name__,
+            self.create_folders_for_prod_and_stag.__name__,
+            __file__,
+            log_file,
         )
+
+        self.log_writer.start_log("start", **log_dic)
 
         try:
             self.s3.create_folder(
@@ -63,14 +64,10 @@ class Load_Prod_Model:
                 self.stag_model_dir, bucket, log_file,
             )
 
-            self.log_writer.start_log(
-                "exit", self.class_name, method_name, log_file,
-            )
+            self.log_writer.start_log("exit", **log_dic)
 
         except Exception as e:
-            self.log_writer.exception_log(
-                e, self.class_name, method_name, log_file,
-            )
+            self.log_writer.exception_log(e, **log_dic)
 
     def load_production_model(self):
         """
@@ -84,11 +81,14 @@ class Load_Prod_Model:
         
         Revisions   :   moved setup to cloud
         """
-        method_name = self.load_production_model.__name__
-
-        self.log_writer.start_log(
-            "start", self.class_name, method_name, self.load_prod_model_log,
+        log_dic = get_log_dic(
+            self.__class__.__name__,
+            self.load_production_model.__name__,
+            __file__,
+            self.load_prod_model_log,
         )
+
+        self.log_writer.start_log("start", **log_dic)
 
         try:
             self.create_folders_for_prod_and_stag(
@@ -119,21 +119,15 @@ class Load_Prod_Model:
                 if model != "KMeans"
             ]
 
-            self.log_writer.log(
-                self.load_prod_model_log, "Created cols for all registered model",
-            )
+            self.log_writer.log("Created cols for all registered model", **log_dic)
 
             runs_cols = runs[cols].max().sort_values(ascending=False)
 
-            self.log_writer.log(
-                self.load_prod_model_log, "Sorted the runs cols in descending order",
-            )
+            self.log_writer.log("Sorted the runs cols in descending order", **log_dic)
 
             metrics_dict = runs_cols.to_dict()
 
-            self.log_writer.log(
-                self.load_prod_model_log, "Converted runs cols to dict",
-            )
+            self.log_writer.log("Converted runs cols to dict", **log_dic)
 
             """ 
             Eg-output: For 3 clusters, 
@@ -160,20 +154,22 @@ run_number  metrics.XGBoost0-best_score metrics.RandomForest1-best_score metrics
     2                                                                           
             """
 
-            best_metrics_names = [
+            top_mn_lst = [
                 max(
                     [
                         (file, metrics_dict[file])[0]
+                        .split(".")[1]
+                        .split("-best_score")[0]
                         for file in metrics_dict
-                        if str(i) in file
+                        if str(i)
+                        in file.split(".")[1].split("-best_score")[0].split("-")[-1]
                     ]
                 )
                 for i in range(0, self.num_clusters)
             ]
 
             self.log_writer.log(
-                self.load_prod_model_log,
-                f"Got top model names based on the metrics of clusters",
+                f"Got top model names based on the metrics of clusters", **log_dic
             )
 
             ## best_metrics will store the value of metrics, but we want the names of the models,
@@ -183,11 +179,7 @@ run_number  metrics.XGBoost0-best_score metrics.RandomForest1-best_score metrics
 
             ## top_mn_lst - will store the top 3 model names
 
-            top_mn_lst = [mn.split(".")[1].split("-")[0] for mn in best_metrics_names]
-
-            self.log_writer.log(
-                self.load_prod_model_log, f"Got the top model names",
-            )
+            self.log_writer.log(f"Got the top model names", **log_dic)
 
             results = self.mlflow_op.search_mlflow_models(order="DESC")
 
@@ -229,15 +221,10 @@ run_number  metrics.XGBoost0-best_score metrics.RandomForest1-best_score metrics
                         )
 
             self.log_writer.log(
-                self.load_prod_model_log,
-                "Transitioning of models based on scores successfully done",
+                "Transitioning of models based on scores successfully done", **log_dic
             )
 
-            self.log_writer.start_log(
-                "exit", self.class_name, method_name, self.load_prod_model_log,
-            )
+            self.log_writer.start_log("exit", **log_dic)
 
         except Exception as e:
-            self.log_writer.exception_log(
-                e, self.class_name, method_name, self.load_prod_model_log,
-            )
+            self.log_writer.exception_log(e, **log_dic)

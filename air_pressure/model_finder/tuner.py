@@ -3,8 +3,10 @@ from sklearn.ensemble import AdaBoostClassifier, RandomForestClassifier
 from sklearn.metrics import accuracy_score, roc_auc_score
 from sklearn.model_selection import GridSearchCV, train_test_split
 
+from air_pressure.mlflow_utils.mlflow_operations import MLFlow_Operation
+from air_pressure.s3_bucket_operations.s3_operations import S3_Operation
 from utils.logger import App_Logger
-from utils.read_params import read_params
+from utils.read_params import get_log_dic, read_params
 
 
 class Model_Finder:
@@ -18,9 +20,25 @@ class Model_Finder:
     def __init__(self, log_file):
         self.log_file = log_file
 
-        self.class_name = self.__class__.__name__
-
         self.config = read_params()
+
+        self.s3 = S3_Operation()
+
+        self.mlflow_op = MLFlow_Operation(log_file)
+
+        self.tuner_kwargs = self.config["model_utils"]
+
+        self.split_kwargs = self.config["base"]
+
+        self.run_name = self.config["mlflow_config"]["run_name"]
+
+        self.train_model_dir = self.config["model_dir"]["trained"]
+
+        self.model_bucket = self.config["s3_bucket"]["air_pressure_model_bucket"]
+
+        self.exp_name = self.config["mlflow_config"]["experiment_name"]
+
+        self.save_format = self.config["save_format"]
 
         self.log_writer = App_Logger()
 
@@ -40,11 +58,14 @@ class Model_Finder:
         Version     :   1.2
         Revisions   :   moved setup to cloud
         """
-        method_name = self.get_adaboost_model.__name__
-
-        self.log_writer.start_log(
-            "start", self.class_name, method_name, self.log_file,
+        log_dic = get_log_dic(
+            self.__class__.__name__,
+            self.get_adaboost_model.__name__,
+            __file__,
+            self.log_file,
         )
+
+        self.log_writer.start_log("start", **log_dic)
 
         try:
             self.ada_model_name = self.ada_model.__class__.__name__
@@ -54,34 +75,30 @@ class Model_Finder:
             )
 
             self.log_writer.log(
-                self.log_file,
                 f"{self.ada_model_name} model best params are {self.adaboost_best_params}",
+                **log_dic,
             )
 
             self.ada_model.set_params(**self.adaboost_best_params)
 
             self.log_writer.log(
-                self.log_file,
                 f"Initialized {self.ada_model_name} with {self.adaboost_best_params} as params",
+                **log_dic,
             )
 
             self.ada_model.fit(train_x, train_y)
 
             self.log_writer.log(
-                self.log_file,
                 f"Created {self.ada_model_name} based on the {self.adaboost_best_params} as params",
+                **log_dic,
             )
 
-            self.log_writer.start_log(
-                "exit", self.class_name, method_name, self.log_file,
-            )
+            self.log_writer.start_log("exit", **log_dic)
 
             return self.ada_model
 
         except Exception as e:
-            self.log_writer.exception_log(
-                e, self.class_name, method_name, self.log_file,
-            )
+            self.log_writer.exception_log(e, **log_dic)
 
     def get_rf_model(self, train_x, train_y):
         """
@@ -96,11 +113,11 @@ class Model_Finder:
         
         Revisions   :   moved setup to cloud
         """
-        method_name = self.get_rf_model.__name__
-
-        self.log_writer.start_log(
-            "start", self.class_name, method_name, self.log_file,
+        log_dic = get_log_dic(
+            self.__class__.__name__, self.get_rf_model.__name__, __file__, self.log_file
         )
+
+        self.log_writer.start_log("start", **log_dic)
 
         try:
             self.rf_model_name = self.rf_model.__class__.__name__
@@ -110,34 +127,30 @@ class Model_Finder:
             )
 
             self.log_writer.log(
-                self.log_file,
                 f"{self.rf_model_name} model best params are {self.rf_best_params}",
+                **log_dic,
             )
 
             self.rf_model.set_params(**self.rf_best_params)
 
             self.log_writer.log(
-                self.log_file,
                 f"Initialized {self.rf_model_name} with {self.rf_best_params} as params",
+                **log_dic,
             )
 
             self.rf_model.fit(train_x, train_y)
 
             self.log_writer.log(
-                self.log_file,
                 f"Created {self.rf_model_name} based on the {self.rf_best_params} as params",
+                **log_dic,
             )
 
-            self.log_writer.start_log(
-                "exit", self.class_name, method_name, self.log_file,
-            )
+            self.log_writer.start_log("exit", **log_dic)
 
             return self.rf_model
 
         except Exception as e:
-            self.log_writer.exception_log(
-                e, self.class_name, method_name, self.log_file,
-            )
+            self.log_writer.exception_log(e, **log_dic)
 
     def get_model_score(self, model, test_x, test_y, log_file):
         """
@@ -150,10 +163,11 @@ class Model_Finder:
         Version     :   1.2
         Revisions   :   moved setup to cloud
         """
+        log_dic = get_log_dic(
+            self.__class__.__name__, self.get_model_score.__name__, __file__, log_file
+        )
 
-        method_name = self.get_model_score.__name__
-
-        self.log_writer.start_log("start", self.class_name, method_name, log_file)
+        self.log_writer.start_log("start", **log_dic)
 
         try:
             model_name = model.__class__.__name__
@@ -161,29 +175,29 @@ class Model_Finder:
             preds = model.predict(test_x)
 
             self.log_writer.log(
-                log_file, f"Used {model_name} model to get predictions on test data"
+                f"Used {model_name} model to get predictions on test data", **log_dic
             )
 
             if len(test_y.unique()) == 1:
                 model_score = accuracy_score(test_y, preds)
 
                 self.log_writer.log(
-                    log_file, f"Accuracy for {model_name} is {model_score}"
+                    f"Accuracy for {model_name} is {model_score}", **log_dic
                 )
 
             else:
                 model_score = roc_auc_score(test_y, preds)
 
                 self.log_writer.log(
-                    log_file, f"AUC score for {model_name} is {model_score}"
+                    f"AUC score for {model_name} is {model_score}", **log_dic
                 )
 
-            self.log_writer.start_log("exit", self.class_name, method_name, log_file)
+            self.log_writer.start_log("exit", **log_dic)
 
             return model_score
 
         except Exception as e:
-            self.log_writer.exception_log(e, self.class_name, method_name, log_file)
+            self.log_writer.exception_log(e, **log_dic)
 
     def get_model_params(self, model, x_train, y_train, log_file):
         """
@@ -196,10 +210,11 @@ class Model_Finder:
         Version     :   1.2
         Revisions   :   moved setup to cloud
         """
+        log_dic = get_log_dic(
+            self.__class__.__name__, self.get_model_params.__name__, __file__, log_file
+        )
 
-        method_name = self.get_model_params.__name__
-
-        self.log_writer.start_log("start", self.class_name, method_name, log_file)
+        self.log_writer.start_log("start", **log_dic)
 
         try:
             model_name = model.__class__.__name__
@@ -211,28 +226,33 @@ class Model_Finder:
             )
 
             self.log_writer.log(
-                log_file,
                 f"Initialized {model_grid.__class__.__name__}  with {model_param_grid} as params",
+                **log_dic,
             )
 
             model_grid.fit(x_train, y_train)
 
             self.log_writer.log(
-                log_file,
                 f"Found the best params for {model_name} model based on {model_param_grid} as params",
+                *log_dic,
             )
 
-            self.log_writer.start_log("exit", self.class_name, method_name, log_file)
+            self.log_writer.start_log("exit", **log_dic)
 
             return model_grid.best_params_
 
         except Exception as e:
-            self.log_writer.exception_log(e, self.class_name, method_name, log_file)
+            self.log_writer.exception_log(e, **log_dic)
 
     def train_and_log_models(self, X_data, Y_data, log_file, idx=None, kmeans=None):
-        method_name = self.train_and_log_models.__name__
+        log_dic = get_log_dic(
+            self.__class__.__name__,
+            self.train_and_log_models.__name__,
+            __file__,
+            log_file,
+        )
 
-        self.log_writer.start_log("start", log_file, self.class_name, method_name)
+        self.log_writer.start_log("start", **log_dic)
 
         try:
             x_train, x_test, y_train, y_test = train_test_split(
@@ -240,21 +260,17 @@ class Model_Finder:
             )
 
             self.log_writer.log(
-                log_file,
                 f"Performed train test split with kwargs as {self.split_kwargs}",
+                **log_dic,
             )
 
-            lst = self.model_finder.get_trained_models(x_train, y_train, x_test, y_test)
+            lst = self.get_trained_models(x_train, y_train, x_test, y_test, log_file)
 
-            self.log_writer.log(log_file, "Got trained models")
+            self.log_writer.log("Got trained models", **log_dic)
 
             for _, tm in enumerate(lst):
                 self.s3.save_model(
-                    tm[0],
-                    self.train_model_dir,
-                    self.model_bucket,
-                    log_file,
-                    format=self.save_format,
+                    tm[0], self.train_model_dir, self.model_bucket, log_file, idx=idx
                 )
 
                 self.mlflow_op.set_mlflow_tracking_uri()
@@ -262,22 +278,22 @@ class Model_Finder:
                 self.mlflow_op.set_mlflow_experiment(self.exp_name)
 
                 with mlflow.start_run(run_name=self.run_name):
-                    self.mlflow_op.log_all_for_model(idx, tm[0], tm[1])
+                    self.mlflow_op.log_all_for_model(tm[0], tm[1], idx)
 
                     if kmeans is not None:
-                        self.mlflow_op.log_all_for_model(None, kmeans, None)
+                        self.mlflow_op.log_all_for_model(kmeans, None, None)
 
                     else:
                         pass
 
             self.log_writer.log(
-                log_file, "Saved and logged all trained models to mlflow"
+                "Saved and logged all trained models to mlflow", **log_dic
             )
 
-            self.log_writer.start_log("exit", log_file, self.class_name, method_name)
+            self.log_writer.start_log("exit", **log_dic)
 
         except Exception as e:
-            self.log_writer.exception_log(e, log_file, self.class_name, method_name)
+            self.log_writer.exception_log(e, **log_dic)
 
     def get_trained_models(self, train_x, train_y, test_x, test_y, log_file):
         """
@@ -290,11 +306,14 @@ class Model_Finder:
         Version     :   1.0
         Revisions   :   None
         """
-        method_name = self.get_trained_models.__name__
-
-        self.log_writer.start_log(
-            "start", self.class_name, method_name, log_file,
+        log_dic = get_log_dic(
+            self.__class__.__name__,
+            self.get_trained_models.__name__,
+            __file__,
+            log_file,
         )
+
+        self.log_writer.start_log("start", **log_dic)
 
         try:
             self.ada_model = self.get_adaboost_model(train_x=train_x, train_y=train_y)
@@ -309,9 +328,7 @@ class Model_Finder:
                 self.rf_model, test_x, test_y, log_file,
             )
 
-            self.log_writer.start_log(
-                "exit", self.class_name, method_name, log_file,
-            )
+            self.log_writer.start_log("exit", **log_dic)
 
             lst = [
                 (self.rf_model, self.rf_model_score),
@@ -321,6 +338,4 @@ class Model_Finder:
             return lst
 
         except Exception as e:
-            self.log_writer.exception_log(
-                e, self.class_name, method_name, log_file,
-            )
+            self.log_writer.exception_log(e, **log_dic)
