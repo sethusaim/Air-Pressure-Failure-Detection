@@ -12,6 +12,8 @@ demotest.py
 
 .terraform.lock.hcl
 
+data_given/
+
 # Distribution / packaging
 .Python
 build/
