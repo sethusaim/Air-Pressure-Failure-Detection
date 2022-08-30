@@ -578,14 +578,14 @@ class S3_Operation:
             func = (
                 lambda: model_name + self.file_format
                 if model_dir is None
-                else model_dir + model_name + self.file_format
+                else model_dir + "/" + model_name + self.file_format
             )
 
             model_file = func()
 
             self.log_writer.log(f"Got {model_file} as model file", **log_dic)
 
-            f_obj = self.get_file_object(model_name, bucket, log_file)
+            f_obj = self.get_file_object(model_file, bucket, log_file)
 
             model_obj = self.read_object(f_obj, log_file, decode=False)
 

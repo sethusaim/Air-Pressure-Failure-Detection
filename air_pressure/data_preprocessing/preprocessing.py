@@ -1,5 +1,6 @@
 import numpy as np
 import pandas as pd
+from imblearn.over_sampling import SMOTE
 from sklearn.decomposition import PCA
 from sklearn.impute import KNNImputer
 from sklearn.preprocessing import StandardScaler
@@ -158,11 +159,11 @@ class Preprocessor:
 
         self.log_writer.start_log("start", **log_dic)
 
-        null_present = False
+        self.null_present = False
 
-        cols_with_missing_values = []
+        self.cols_with_missing_values = []
 
-        cols = data.columns
+        self.cols = data.columns
 
         try:
             self.null_counts = data.isna().sum()
@@ -171,13 +172,13 @@ class Preprocessor:
 
             for i in range(len(self.null_counts)):
                 if self.null_counts[i] > 0:
-                    null_present = True
+                    self.null_present = True
 
-                    cols_with_missing_values.append(cols[i])
+                    self.cols_with_missing_values.append(self.cols[i])
 
             self.log_writer.log("created cols with missing values", **log_dic)
 
-            if null_present:
+            if self.null_present:
                 self.log_writer.log(
                     "null values were found the columns...preparing dataframe with null values",
                     **log_dic,
@@ -209,7 +210,7 @@ class Preprocessor:
 
             self.log_writer.start_log("exit", **log_dic)
 
-            return null_present
+            return self.null_present
 
         except Exception as e:
             self.log_writer.exception_log(e, **log_dic)
@@ -246,40 +247,6 @@ class Preprocessor:
         except Exception as e:
             self.log_writer.exception_log(e, **log_dic)
 
-    # def impute_missing_values(self, data):
-    #     """
-    #     Method Name :   impute_missing_values
-    #     Description :   This method replaces all the missing values in the dataframe using mean values of the column.
-
-    #     Output      :   A dataframe which has all the missing values imputed.
-    #     On Failure  :   Write an exception log and then raise an exception
-
-    #     Version     :   1.2
-    #     Revisions   :   moved setup to cloud
-    #     """
-    #     log_dic = get_log_dic(
-    #         self.__class__.__name__,
-    #         self.impute_missing_values.__name__,
-    #         __file__,
-    #         self.log_file,
-    #     )
-
-    #     try:
-    #         self.log_writer.start_log("start", **log_dic)
-
-    #         data = data[data.columns[data.isnull().mean() < 0.6]]
-
-    #         data = data.apply(pd.to_numeric)
-
-    #         for col in data.columns:
-    #             data[col] = data[col].replace(np.NaN, data[col].mean(), inplace=True)
-
-    #         self.log_writer.start_log("exit", **log_dic)
-
-    #         return data
-
-    #     except Exception as e:
-    #         self.log_writer.exception_log(e, **log_dic)
 
     def impute_missing_values(self, data):
         """
@@ -315,7 +282,7 @@ class Preprocessor:
             self.new_array = imputer.fit_transform(self.data)
 
             self.new_data = pd.DataFrame(
-                data=(self.new_array), columns=self.data.columns
+                data=self.new_array, columns=self.data.columns
             )
 
             self.log_writer.log("Created new dataframe with imputed values", **log_dic)
@@ -459,3 +426,14 @@ class Preprocessor:
 
         except Exception as e:
             self.log_writer.exception_log(e, **log_dic)
+
+    def handleImbalance(self,X,Y):
+        try:
+            sample = SMOTE()
+
+            X_bal, y_bal = sample.fit_resample(X, Y)
+
+            return X_bal,y_bal
+        
+        except Exception as e:
+            raise e 

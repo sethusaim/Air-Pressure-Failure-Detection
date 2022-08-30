@@ -83,6 +83,39 @@ class Prediction:
         except Exception as e:
             self.log_writer.exception_log(e, **log_dic)
 
+    def get_prod_model_name(self, folder, bucket, log_file):
+        """
+        Method Name :   predict_from_model
+        Description :   This method is used for loading from prod model dir of s3 bucket and use them for prediction
+
+        Version     :   1.2
+        Revisions   :   moved setup to cloud
+        """
+        log_dic = get_log_dic(
+            self.__class__.__name__,
+            self.get_prod_model_name.__name__,
+            __file__,
+            log_file,
+        )
+
+        self.log_writer.start_log("start", **log_dic)
+
+        try:
+            list_of_files = self.s3.get_files_from_folder(folder, bucket, log_file)
+
+            self.log_writer.log(
+                f"Got list of files from {folder} folder in {bucket} bucket", **log_dic
+            )
+
+            return [
+                f.split(".")[0].split("/")[1]
+                for f in list_of_files
+                if f.endswith(".sav")
+            ][0]
+
+        except Exception as e:
+            self.log_writer.exception_log(e, **log_dic)
+
     def predict_from_model(self):
         """
         Method Name :   predict_from_model
@@ -109,28 +142,28 @@ class Prediction:
 
             if is_null_present:
                 data = self.preprocessor.impute_missing_values(data=data)
-
-            cols_to_drop = self.preprocessor.get_columns_with_zero_std_deviation(
-                data=data
-            )
+            
+            cols_to_drop = ['cd_000', 'ch_000']
 
             X = self.preprocessor.remove_columns(data, cols_to_drop)
 
             X = self.preprocessor.scale_numerical_columns(data=X)
 
             X = self.preprocessor.apply_pca_transform(X_scaled_data=X)
-
-            prod_model_name = self.prod_model_dir + "/" + "model_name"
+            
+            prod_model_name = self.get_prod_model_name(
+                self.prod_model_dir, self.model_bucket, self.pred_log
+            )
 
             model = self.s3.load_model(
-                prod_model_name, self.model_bucket, self.pred_log
+                prod_model_name, self.model_bucket, self.pred_log,model_dir=self.prod_model_dir
             )
 
             result = list(model.predict(X))
 
             result = pd.DataFrame(result, columns=["Predictions"])
 
-            result["Predictions"] = result["Predictions"].map({0: "neg", 1: "pos"})
+            result["Predictions"] = result["Predictions"].map({0: 'neg', 1: 'pos'})
 
             self.s3.upload_df_as_csv(
                 result,

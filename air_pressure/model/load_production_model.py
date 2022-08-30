@@ -43,8 +43,8 @@ class Load_Prod_Model:
 
         self.log_writer.start_log("start", **log_dic)
 
-        try:            
-            top_mn_lst = max(model_lst,key=lambda item:item[0])[1]
+        try:
+            top_mn_lst = max(model_lst, key=lambda item: item[0])[1]
 
             self.log_writer.log("Got the top model names", **log_dic)
 
