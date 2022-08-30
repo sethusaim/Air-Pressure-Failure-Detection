@@ -1,5 +1,4 @@
 import pandas as pd
-from botocore.exceptions import ClientError
 
 from air_pressure.data_ingestion.data_loader_prediction import Data_Getter_Pred
 from air_pressure.data_preprocessing.preprocessing import Preprocessor
@@ -23,7 +22,7 @@ class Prediction:
 
         self.model_bucket = self.config["s3_bucket"]["air_pressure_model_bucket"]
 
-        self.input_files_bucket = self.config["s3_bucket"]["inputs_files_bucket"]
+        self.input_files_bucket = self.config["s3_bucket"]["input_files_bucket"]
 
         self.prod_model_dir = self.config["model_dir"]["prod"]
 
@@ -121,46 +120,25 @@ class Prediction:
 
             X = self.preprocessor.apply_pca_transform(X_scaled_data=X)
 
-            kmeans_model_name = self.prod_model_dir + "/" + "KMeans"
+            prod_model_name = self.prod_model_dir + "/" + "model_name"
 
-            kmeans_model = self.s3.load_model(
-                kmeans_model_name, self.model_bucket, self.pred_log
+            model = self.s3.load_model(
+                prod_model_name, self.model_bucket, self.pred_log
             )
 
-            clusters = kmeans_model.predict(data)
+            result = list(model.predict(X))
 
-            data["clusters"] = clusters
+            result = pd.DataFrame(result, columns=["Predictions"])
 
-            unique_clusters = data["clusters"].unique()
+            result["Predictions"] = result["Predictions"].map({0: "neg", 1: "pos"})
 
-            for i in unique_clusters:
-                cluster_data = data[data["clusters"] == i]
-
-                cluster_data = cluster_data.drop(["clusters"], axis=1)
-
-                model_name = self.find_correct_model_file(
-                    i, self.model_bucket, self.pred_log,
-                )
-
-                prod_model_name = self.prod_model_dir + "/" + model_name
-
-                model = self.s3.load_model(
-                    prod_model_name, self.model_bucket, self.pred_log
-                )
-
-                result = list(model.predict(cluster_data))
-
-                result = pd.DataFrame(result, columns=["Predictions"])
-
-                result["Predictions"] = result["Predictions"].map({0: "neg", 1: "pos"})
-
-                self.s3.upload_df_as_csv(
-                    result,
-                    self.pred_output_file,
-                    self.pred_output_file,
-                    self.input_files_bucket,
-                    self.pred_log,
-                )
+            self.s3.upload_df_as_csv(
+                result,
+                self.pred_output_file,
+                self.pred_output_file,
+                self.input_files_bucket,
+                self.pred_log,
+            )
 
             self.log_writer.log("End of prediction", **log_dic)
 

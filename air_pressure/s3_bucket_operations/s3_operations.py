@@ -474,13 +474,9 @@ class S3_Operation:
         self.log_writer.start_log("start", **log_dic)
 
         try:
-            self.copy_data(
-                from_bucket, from_fname, to_bucket, to_fname, log_file,
-            )
+            self.copy_data(from_fname, from_bucket, to_fname, to_bucket, log_file)
 
-            self.delete_file(
-                from_bucket, from_fname, log_file,
-            )
+            self.delete_file(from_fname, from_bucket, log_file)
 
             self.log_writer.log(
                 f"Moved {from_fname} from bucket {from_bucket} to {to_bucket}",
@@ -624,13 +620,7 @@ class S3_Operation:
         try:
             model_name = model.__class__.__name__
 
-            func = (
-                lambda: model_name + self.file_format
-                if model_name == "KMeans"
-                else model_name + str(idx) + self.file_format
-            )
-
-            model_file = func()
+            model_file = model_name + self.file_format
 
             with open(file=model_file, mode="wb") as f:
                 pickle.dump(model, f)

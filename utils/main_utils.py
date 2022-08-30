@@ -1,4 +1,5 @@
 import os
+import shutil
 
 from air_pressure.s3_bucket_operations.s3_operations import S3_Operation
 from utils.logger import App_Logger
@@ -20,20 +21,6 @@ class Main_Utils:
         self.train_data_bucket = self.config["s3_bucket"][
             "air_pressure_train_data_bucket"
         ]
-
-    def upload_logs(self, log_path, bucket):
-        try:
-            log_dir = os.listdir(log_path)
-
-            for log in log_dir:
-                abs_f = log_path + "/" + log
-
-                self.s3.upload_file(abs_f, abs_f, bucket, "train_upload_log.txt")
-
-            os.removedirs(log_path)
-
-        except Exception as e:
-            raise e
 
     def create_dirs_for_good_bad_data(self, log_file):
         """

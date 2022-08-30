@@ -61,15 +61,11 @@ class Data_Transform_Pred:
 
                 abs_f = t_pdf[2]
 
-                df["class"] = df["class"].apply(lambda x: "'" + str(x) + "'")
-
                 for column in df.columns:
                     count = df[column][df[column] == "na"].count()
 
                     if count != 0:
                         df[column] = df[column].replace("na", "'na'")
-
-                self.log_writer.log(f"Quotes added for the file {file}", **log_dic)
 
                 self.s3.upload_df_as_csv(
                     df,

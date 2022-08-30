@@ -234,7 +234,7 @@ class Model_Finder:
 
             self.log_writer.log(
                 f"Found the best params for {model_name} model based on {model_param_grid} as params",
-                *log_dic,
+                **log_dic,
             )
 
             self.log_writer.start_log("exit", **log_dic)
@@ -244,7 +244,7 @@ class Model_Finder:
         except Exception as e:
             self.log_writer.exception_log(e, **log_dic)
 
-    def train_and_log_models(self, X_data, Y_data, log_file, idx=None, kmeans=None):
+    def train_and_log_models(self, X_data, Y_data, log_file):
         log_dic = get_log_dic(
             self.__class__.__name__,
             self.train_and_log_models.__name__,
@@ -264,13 +264,15 @@ class Model_Finder:
                 **log_dic,
             )
 
-            lst = self.get_trained_models(x_train, y_train, x_test, y_test, log_file)
+            model_lst, model_score_lst = self.get_trained_models(
+                x_train, y_train, x_test, y_test, log_file
+            )
 
             self.log_writer.log("Got trained models", **log_dic)
 
-            for _, tm in enumerate(lst):
+            for _, tm in enumerate(model_lst):
                 self.s3.save_model(
-                    tm[0], self.train_model_dir, self.model_bucket, log_file, idx=idx
+                    tm[1], self.train_model_dir, self.model_bucket, log_file
                 )
 
                 self.mlflow_op.set_mlflow_tracking_uri()
@@ -278,19 +280,15 @@ class Model_Finder:
                 self.mlflow_op.set_mlflow_experiment(self.exp_name)
 
                 with mlflow.start_run(run_name=self.run_name):
-                    self.mlflow_op.log_all_for_model(tm[0], tm[1], idx)
-
-                    if kmeans is not None:
-                        self.mlflow_op.log_all_for_model(kmeans, None, None)
-
-                    else:
-                        pass
+                    self.mlflow_op.log_all_for_model(tm[1], tm[0])
 
             self.log_writer.log(
                 "Saved and logged all trained models to mlflow", **log_dic
             )
 
             self.log_writer.start_log("exit", **log_dic)
+
+            return model_score_lst
 
         except Exception as e:
             self.log_writer.exception_log(e, **log_dic)
@@ -330,12 +328,17 @@ class Model_Finder:
 
             self.log_writer.start_log("exit", **log_dic)
 
-            lst = [
-                (self.rf_model, self.rf_model_score),
-                (self.ada_model, self.ada_model_score),
+            model_lst = [
+                (self.rf_model_score, self.rf_model),
+                (self.ada_model_score, self.ada_model),
             ]
 
-            return lst
+            model_score_lst = [
+                (float(self.rf_model_score), self.rf_model.__class__.__name__),
+                (float(self.ada_model_score), self.ada_model.__class__.__name__),
+            ]
+
+            return model_lst, model_score_lst
 
         except Exception as e:
             self.log_writer.exception_log(e, **log_dic)

@@ -1,5 +1,4 @@
 from air_pressure.data_ingestion.data_loader_train import Data_Getter_Train
-from air_pressure.data_preprocessing.clustering import KMeans_Clustering
 from air_pressure.data_preprocessing.preprocessing import Preprocessor
 from air_pressure.mlflow_utils.mlflow_operations import MLFlow_Operation
 from air_pressure.model_finder.tuner import Model_Finder
@@ -31,8 +30,6 @@ class Train_Model:
         self.data_getter_train = Data_Getter_Train(self.model_train_log)
 
         self.preprocessor = Preprocessor(self.model_train_log)
-
-        self.kmeans_op = KMeans_Clustering(self.model_train_log)
 
         self.tuner = Model_Finder(self.model_train_log)
 
@@ -74,39 +71,15 @@ class Train_Model:
 
             X, Y = self.preprocessor.separate_label_feature(data, self.target_col)
 
-            number_of_clusters = self.kmeans_op.elbow_plot(X)
-
-            X, kmeans_model = self.kmeans_op.create_clusters(X, number_of_clusters)
-
-            X["Labels"] = Y
-
-            list_of_clusters = X["Cluster"].unique()
-
-            for i in list_of_clusters:
-                cluster_data = X[X["Cluster"] == i]
-
-                cluster_features = cluster_data.drop(["Labels", "Cluster"], axis=1)
-
-                cluster_label = cluster_data["Labels"]
-
-                self.log_writer.log(
-                    "Seprated cluster features and cluster label for the cluster data",
-                    **log_dic
-                )
-
-                self.tuner.train_and_log_models(
-                    cluster_features,
-                    cluster_label,
-                    self.model_train_log,
-                    idx=i,
-                    kmeans=kmeans_model,
-                )
+            model_score_lst = self.tuner.train_and_log_models(
+                X, Y, self.model_train_log
+            )
 
             self.log_writer.log("Successful End of Training", **log_dic)
 
             self.log_writer.start_log("exit", **log_dic)
 
-            return number_of_clusters
+            return model_score_lst
 
         except Exception as e:
             self.log_writer.log("Unsuccessful End of Training", **log_dic)

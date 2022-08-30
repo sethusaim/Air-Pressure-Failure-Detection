@@ -398,26 +398,20 @@ class MLFlow_Operation:
 
             base_model_name = model.__class__.__name__
 
-            if base_model_name is "KMeans":
-                self.log_model(model, base_model_name)
+            self.log_writer.log(f"Got the model name as {base_model_name}", **log_dic)
 
-            else:
-                model_name = base_model_name + str(idx)
+            model_params_list = list(self.config[base_model_name].keys())
 
-                self.log_writer.log(f"Got the model name as {model_name}", **log_dic)
+            self.log_writer.log(
+                f"Created a list of params based on {base_model_name}", **log_dic
+            )
 
-                model_params_list = list(self.config[base_model_name].keys())
+            for param in model_params_list:
+                self.log_param(idx, model, base_model_name, param=param)
 
-                self.log_writer.log(
-                    f"Created a list of params based on {model_name}", **log_dic
-                )
+            self.log_model(model, base_model_name)
 
-                for param in model_params_list:
-                    self.log_param(idx, model, model_name, param=param)
-
-                self.log_model(model, model_name)
-
-                self.log_metric(model_name, metric=float(model_score))
+            self.log_metric(base_model_name, metric=float(model_score))
 
             self.log_writer.start_log("exit", **log_dic)
 

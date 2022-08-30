@@ -9,12 +9,10 @@ from fastapi.templating import Jinja2Templates
 from air_pressure.model.load_production_model import Load_Prod_Model
 from air_pressure.model.prediction_from_model import Prediction
 from air_pressure.model.training_model import Train_Model
-from air_pressure.validation_insertion.prediction_validation_insertion import (
-    Pred_Validation,
-)
-from air_pressure.validation_insertion.train_validation_insertion import (
-    Train_Validation,
-)
+from air_pressure.validation_insertion.prediction_validation_insertion import \
+    Pred_Validation
+from air_pressure.validation_insertion.train_validation_insertion import \
+    Train_Validation
 from utils.read_params import read_params
 
 app = FastAPI()
@@ -50,13 +48,11 @@ async def trainRouteClient():
 
         train_model = Train_Model()
 
-        num_clusters = train_model.training_model()
+        model_score_lst = train_model.training_model()
 
-        load_prod_model = Load_Prod_Model(num_clusters=num_clusters)
+        load_prod_model = Load_Prod_Model()
 
-        load_prod_model.load_production_model()
-
-        # upload_logs("logs", config["s3_bucket"]["logs"])
+        load_prod_model.load_production_model(model_score_lst)
 
         return Response("Training successfull!!")
 
@@ -67,7 +63,7 @@ async def trainRouteClient():
 @app.get("/predict")
 async def predictRouteClient():
     try:
-        pred_val = Pred_Validation(config["s3_bucket"]["air_pressure_raw_data"])
+        pred_val = Pred_Validation()
 
         pred_val.prediction_validation()
 

@@ -19,6 +19,7 @@ class Raw_Pred_Data_Validation:
         self.config = read_params()
 
         self.raw_data_bucket = self.config["s3_bucket"]["air_pressure_raw_data_bucket"]
+
         self.log_writer = App_Logger()
 
         self.s3 = S3_Operation()
