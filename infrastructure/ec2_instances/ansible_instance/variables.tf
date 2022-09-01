@@ -15,7 +15,7 @@ variable "ansible_instance_type" {
 
 variable "ansible_key_pair_name" {
   type    = string
-  default = "sethu"
+  default = "sethusaim"
 }
 
 variable "ansible_tag_name" {
@@ -34,8 +34,8 @@ variable "ansible_sg_group_name" {
 }
 
 variable "ansible_ingress_from_port" {
-  type    = list(number)
-  default = [22, 9100, 9090]
+  type    = number
+  default = 22
 }
 
 variable "ansible_cidr_block" {
@@ -49,8 +49,8 @@ variable "ansible_protocol" {
 }
 
 variable "ansible_ingress_to_port" {
-  type    = list(number)
-  default = [22, 9090, 9100]
+  type    = number
+  default = 22
 }
 
 variable "ansible_egress_from_port" {
