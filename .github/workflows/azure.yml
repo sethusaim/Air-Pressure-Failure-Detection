@@ -23,18 +23,26 @@ jobs:
           username: ${{ secrets.REGISTRY_USERNAME }}
           password: ${{ secrets.REGISTRY_PASSWORD }}
       - run: |
-          docker build . -t ${{ secrets.REGISTRY_LOGIN_SERVER }}/sampleapp:${{ github.sha }}
-          docker push ${{ secrets.REGISTRY_LOGIN_SERVER }}/sampleapp:${{ github.sha }}
+          docker build --build-arg AWS_ACCESS_KEY_ID="${{ secrets.AWS_ACCESS_KEY_ID }}" \
+            --build-arg AWS_SECRET_ACCESS_KEY="${{ secrets.AWS_SECRET_ACCESS_KEY }}" \
+            --build-arg AWS_DEFAULT_REGION="${{ secrets.AWS_DEFAULT_REGION }}" \
+            --build-arg MLFLOW_TRACKING_URI="${{ secrets.MLFLOW_TRACKING_URI }}" \
+            --build-arg MONGODB_URL="${{ secrets.MONGODB_URL }}" \
+            --build-arg MLFLOW_TRACKING_USERNAME="${{ secrets.MLFLOW_TRACKING_USERNAME }}" \
+            --build-arg MLFLOW_TRACKING_PASSWORD="${{ secrets.MLFLOW_TRACKING_PASSWORD }}" -t ${{secrets.REGISTRY_LOGIN_SERVER}}/pressureapp:${{github.sha}}
+          docker push ${{ secrets.REGISTRY_LOGIN_SERVER }}/pressureapp:${{ github.sha }}
 
       - name: "Deploy to Azure Container Instances"
         uses: "azure/aci-deploy@v1"
         with:
           resource-group: ${{ secrets.RESOURCE_GROUP }}
           dns-name-label: ${{ secrets.RESOURCE_GROUP }}${{ github.run_number }}
-          image: ${{ secrets.REGISTRY_LOGIN_SERVER }}/sampleapp:${{ github.sha }}
+          image: ${{ secrets.REGISTRY_LOGIN_SERVER }}/pressureapp:${{ github.sha }}
+          cpu: 2
+          memory: 4
           registry-login-server: ${{ secrets.REGISTRY_LOGIN_SERVER }}
           registry-username: ${{ secrets.REGISTRY_USERNAME }}
           registry-password: ${{ secrets.REGISTRY_PASSWORD }}
-          name: aci-sampleapp
+          name: aci-pressureapp
           location: "west us"
           ports: 8080
