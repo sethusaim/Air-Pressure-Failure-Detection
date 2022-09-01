@@ -142,28 +142,31 @@ class Prediction:
 
             if is_null_present:
                 data = self.preprocessor.impute_missing_values(data=data)
-            
-            cols_to_drop = ['cd_000', 'ch_000']
+
+            cols_to_drop = ["cd_000", "ch_000"]
 
             X = self.preprocessor.remove_columns(data, cols_to_drop)
 
             X = self.preprocessor.scale_numerical_columns(data=X)
 
             X = self.preprocessor.apply_pca_transform(X_scaled_data=X)
-            
+
             prod_model_name = self.get_prod_model_name(
                 self.prod_model_dir, self.model_bucket, self.pred_log
             )
 
             model = self.s3.load_model(
-                prod_model_name, self.model_bucket, self.pred_log,model_dir=self.prod_model_dir
+                prod_model_name,
+                self.model_bucket,
+                self.pred_log,
+                model_dir=self.prod_model_dir,
             )
 
             result = list(model.predict(X))
 
             result = pd.DataFrame(result, columns=["Predictions"])
 
-            result["Predictions"] = result["Predictions"].map({0: 'neg', 1: 'pos'})
+            result["Predictions"] = result["Predictions"].map({0: "neg", 1: "pos"})
 
             self.s3.upload_df_as_csv(
                 result,

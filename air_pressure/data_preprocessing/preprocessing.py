@@ -247,7 +247,6 @@ class Preprocessor:
         except Exception as e:
             self.log_writer.exception_log(e, **log_dic)
 
-
     def impute_missing_values(self, data):
         """
         Method Name :   impute_missing_values
@@ -281,9 +280,7 @@ class Preprocessor:
 
             self.new_array = imputer.fit_transform(self.data)
 
-            self.new_data = pd.DataFrame(
-                data=self.new_array, columns=self.data.columns
-            )
+            self.new_data = pd.DataFrame(data=self.new_array, columns=self.data.columns)
 
             self.log_writer.log("Created new dataframe with imputed values", **log_dic)
 
@@ -427,13 +424,13 @@ class Preprocessor:
         except Exception as e:
             self.log_writer.exception_log(e, **log_dic)
 
-    def handleImbalance(self,X,Y):
+    def handleImbalance(self, X, Y):
         try:
             sample = SMOTE()
 
             X_bal, y_bal = sample.fit_resample(X, Y)
 
-            return X_bal,y_bal
-        
+            return X_bal, y_bal
+
         except Exception as e:
-            raise e 
+            raise e

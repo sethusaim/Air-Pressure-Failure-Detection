@@ -70,17 +70,17 @@ class Train_Model:
                 data = self.preprocessor.impute_missing_values(data)
 
             X, Y = self.preprocessor.separate_label_feature(data, self.target_col)
-            
+
             cols_to_drop = self.preprocessor.get_columns_with_zero_std_deviation(X)
-            
+
             X = self.preprocessor.remove_columns(X, cols_to_drop)
 
             X = self.preprocessor.scale_numerical_columns(X)
 
             X = self.preprocessor.apply_pca_transform(X)
-            
-            X,Y = self.preprocessor.handleImbalance(X,Y)
-            
+
+            X, Y = self.preprocessor.handleImbalance(X, Y)
+
             model_score_lst = self.tuner.train_and_log_models(
                 X, Y, self.model_train_log
             )
