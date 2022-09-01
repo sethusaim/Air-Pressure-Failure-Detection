@@ -9,12 +9,10 @@ from fastapi.templating import Jinja2Templates
 from air_pressure.model.load_production_model import Load_Prod_Model
 from air_pressure.model.prediction_from_model import Prediction
 from air_pressure.model.training_model import Train_Model
-from air_pressure.validation_insertion.prediction_validation_insertion import (
-    Pred_Validation,
-)
-from air_pressure.validation_insertion.train_validation_insertion import (
-    Train_Validation,
-)
+from air_pressure.validation_insertion.prediction_validation_insertion import \
+    Pred_Validation
+from air_pressure.validation_insertion.train_validation_insertion import \
+    Train_Validation
 from utils.read_params import read_params
 
 app = FastAPI()
