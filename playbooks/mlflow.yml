@@ -117,6 +117,12 @@
         update_cache: yes
         force_apt_get: yes
 
+    - name: Upgrade click module
+      ansible.builtin.pip:
+        name: click
+        state: present
+        extra_args: --upgrade
+
     - name: Set user name and password for nginx
       community.general.htpasswd:
         path: /etc/nginx/.htpasswd
