@@ -14,6 +14,14 @@ module "ecr_repo" {
   source = "./ecr"
 }
 
+module "mlflow_instance" {
+  source = "./ec2_instances/mlflow_instance"
+}
+
+module "ansible_instance" {
+  source = "./ec2_instances/ansible_instance"
+}
+
 module "logs_bucket" {
   source = "./s3_buckets/air_pressure_logs_bucket"
 }
