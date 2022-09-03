@@ -146,8 +146,6 @@ terraform init
 terraform apply --auto-approve
 ```
 
-
-
 But the ansible server does not have the pem file, to make ssh connection. So there are different ways in which the pem file can be transferred to ansible server, one is via filezilla way
 
 other way is by manually copy the contents of pem file from local and the pasting it the file and saving it.
@@ -273,7 +271,7 @@ This is all for setting up the project.
 To run the project, we need data, schema_training.json,schema_prediction.json, regex file. All the files are avaiable in the link below
 
 ```bash
-
+https://drive.google.com/file/d/1RFWUP3WFKdQ-Zyqv1c18d_EUkygqwq6q/view?usp=sharing
 ```
 
 Download the files from link to project directory and extract them to main project folder, and copy the data folder,schema files and regex files to main project folder. In the scripts folder locate the upload_data.py file and make required changes to bucket name, and run the following commands
