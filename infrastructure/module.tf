@@ -22,10 +22,6 @@ module "ansible_instance" {
   source = "./ec2_instances/ansible_instance"
 }
 
-module "logs_bucket" {
-  source = "./s3_buckets/air_pressure_logs_bucket"
-}
-
 module "io_files_bucket" {
   source = "./s3_buckets/air_pressure_io_files_bucket"
 }
