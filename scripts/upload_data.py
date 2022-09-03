@@ -4,10 +4,8 @@ from boto3 import resource
 
 s3_resource = resource("s3")
 
-def upload_raw_data(bucket):
-    try:
-        folder = "training_data"
-        
+def upload_folder(folder,bucket):
+    try:        
         for f in folder:
             from_f = join(folder,f)
             
@@ -26,11 +24,13 @@ def upload_file(file_name,bucket):
     except Exception as e:
         raise e 
 
-## For upload_raw_data function, keep bucket name as "yourname-air-pressure-raw-data" 
+## For upload_folder function, keep bucket name as "yourname-air-pressure-raw-data" 
 ## For upload_file function, keep bucket name as "yourname-air-pressure-io-files"
 
-if __name__ == "__main__":
-    upload_raw_data(bucket="")
+if __name__ == "__main__":    
+    upload_folder(folder="training_data",bucket="")
+    
+    upload_folder(folder="prediction_data",bucket="")
     
     upload_file(file_name="air_pressure_schema_training.json",bucket="")
     
