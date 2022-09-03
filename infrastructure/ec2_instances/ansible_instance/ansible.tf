@@ -11,6 +11,14 @@ resource "aws_instance" "ansible_instance" {
     Name = var.ansible_tag_name
   }
 
+  provisioner "remote-exec" {
+    inline = [
+      "wget https://raw.githubusercontent.com/sethusaim/Air-Pressure-Failure-Detection/main/scripts/post_ansible_launch.sh",
+      "bash post_ansible_launch.sh",
+      "rm post_ansible_launch.sh"
+    ]
+  }
+
   root_block_device {
     volume_size = var.ansible_volume_size
     volume_type = var.ansible_volume_type
@@ -18,9 +26,10 @@ resource "aws_instance" "ansible_instance" {
   }
 
   connection {
-    type    = "ssh"
-    host    = self.public_ip
-    user    = "ubuntu"
-    timeout = "4m"
+    type        = "ssh"
+    private_key = file("C:/Users/sethu/Downloads/sethusaim.pem")
+    host        = self.public_ip
+    user        = "ubuntu"
+    timeout     = "4m"
   }
 }
