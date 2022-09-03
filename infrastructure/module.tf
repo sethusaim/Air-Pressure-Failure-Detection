@@ -6,14 +6,6 @@ terraform {
   }
 }
 
-module "mongodb_database" {
-  source = "./database"
-}
-
-module "ecr_repo" {
-  source = "./ecr"
-}
-
 module "mlflow_instance" {
   source = "./ec2_instances/mlflow_instance"
 }
