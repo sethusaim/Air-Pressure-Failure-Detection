@@ -14,6 +14,12 @@ demotest.py
 
 data_given/
 
+air_pressure_regex.txt
+
+air_pressure_schema_prediction.json
+
+air_pressure_schema_training.json
+
 # Distribution / packaging
 .Python
 build/
