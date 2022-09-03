@@ -214,9 +214,15 @@ az login
 You will be redirected to login page in the browser,authorize the login and proceeed. Once the authentication is done. Go to the azure console and create a resource group with 
 pressure as the name. Now we need to create credentials for github actions to connect to azure and deploy our application docker image. In order to do so run the following commands from the powershell terminal
 
-groupId=$(az group show --name pressure --query id --output tsv)
+```bash
+az group show --name pressure --query id --output tsv
+```
 
-az ad sp create-for-rbac --scope $groupId --role Contributor --sdk-auth
+instead of groupId, replace it output of previous command (az group show --name pressure --query id --output tsv)
+
+```bash
+az ad sp create-for-rbac --scope <groupID> --role Contributor --sdk-auth
+```
 
 On running the second commands, we will output similar to this 
 
@@ -234,6 +240,17 @@ On running the second commands, we will output similar to this
   "managementEndpointUrl": "https://management.core.windows.net/"
 }
 ```
+
+```bash
+az acr show --name pressuretesting --resource-group pressure --query id --output tsv
+```
+Grab the output and store it secure in a file, remember this command (az acr show --name pressuretesting --resource-group pressure --query id --output tsv) output is registryId
+
+
+```bash
+az role assignment create --assignee <ClientId> --scope <registryId> --role AcrPush
+```
+
 Grab this json data, and secure it a file.
 
 Now go to pressure resource group, and create a container registry and any proper name, and then click on create. Once the deployment is done go to the resource group and grab the login server and save it in github secrets as REGISTRY_LOGIN_SERVER. 
@@ -253,5 +270,46 @@ This is all for setting up the project.
 
 
 ### Running the project 
+To run the project, we need data, schema_training.json,schema_prediction.json, regex file. All the files are avaiable in the link below
 
-### Outcomes
+```bash
+
+```
+
+Download the files from link to project directory and extract them to main project folder, and copy the data folder,schema files and regex files to main project folder. In the scripts folder locate the upload_data.py file and make required changes to bucket name, and run the following commands
+
+```bash
+python3 scripts/upload_data.py
+```
+
+Once the data is successfully uploaded, along with the schema and regex files, we can see that in s3 console data,regex and schema files are avaiable. Make changes in the project dir to generate changes (if no commits are to be made).
+
+using the git commands, 
+
+```bash
+git add .
+```
+
+```bash
+git commit -m "test" 
+```
+
+```bash
+git push origin main
+```
+
+On successful code push to github we shall see our workflow in running in the actions tab of the repo. On successfull execution of workflow, we see the application url which is encrypted in github, but we can access it via container instances console, locate the url under the name of FQDN
+
+Open the url with port 8080 on the browser, we shall see that index.html page is rendering, if we want to train execute the /train route. if we want to predict execute the /predict route.
+
+Once the work is done, we need to destroy all the all instances, s3 buckets, container instances, container registry which have been created.
+
+To destroy AWS resources run the following commands
+
+```bash
+terraform destroy --auto-approve
+```
+
+Coming to Azure Resources, in the resource group, manually delete all created resources
+
+Well thats is all from the project 
