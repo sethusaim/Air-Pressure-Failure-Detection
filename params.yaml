@@ -133,8 +133,8 @@ log:
   pred_values_from_schema: pred_values_from_schema.log
 
 schema_file:
-  train_schema_file: air_pressure_schema_training.json
-  pred_schema_file: air_pressure_schema_prediction.json
+  train_schema_file: config/air_pressure_schema_training.json
+  pred_schema_file: config/air_pressure_schema_prediction.json
 
 elbow_plot_fig: K-Means_Elbow.PNG
 
@@ -142,7 +142,7 @@ null_values_csv_file: null_values.csv
 
 pred_output_file: predictions.csv
 
-regex_file: air_pressure_regex.txt
+regex_file: config/air_pressure_regex.txt
 
 export_csv_file:
   train: train_input_file.csv
