@@ -5,7 +5,7 @@ on:
     paths-ignore:
       - 'README.md'
 
-name: Push Docker Image to Amazon ECR
+name: Push Application Docker Image to Amazon ECR
 
 jobs: 
   deploy:

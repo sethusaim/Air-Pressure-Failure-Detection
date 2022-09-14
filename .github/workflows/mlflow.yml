@@ -5,7 +5,7 @@ on:
     paths:
       - infrastructure/Dockerfile
 
-name: Push Docker Image to Amazon ECR
+name: Push MLFlow Docker Image to Amazon ECR
 
 jobs: 
   deploy:
