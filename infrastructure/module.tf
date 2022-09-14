@@ -6,12 +6,8 @@ terraform {
   }
 }
 
-module "mlflow_instance" {
-  source = "./ec2_instances/mlflow_instance"
-}
-
-module "ansible_instance" {
-  source = "./ec2_instances/ansible_instance"
+module "app_runner" {
+  source = "./app_runner"
 }
 
 module "io_files_bucket" {
