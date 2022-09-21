@@ -108,7 +108,9 @@ class DB_Operation_Train:
         self.log_writer.start_log("start", **log_dic)
 
         try:
-            df = self.mongo.get_collection_as_dataframe(good_data_db_name,good_data_collection_name,self.train_export_csv_log)
+            df = self.mongo.get_collection_as_dataframe(
+                good_data_db_name, good_data_collection_name, self.train_export_csv_log
+            )
 
             self.s3.upload_df_as_csv(
                 df,
