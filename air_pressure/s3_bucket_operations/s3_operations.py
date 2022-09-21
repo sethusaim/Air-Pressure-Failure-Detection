@@ -689,7 +689,7 @@ class S3_Operation:
         except Exception as e:
             self.log_writer.exception_log(e, **log_dic)
 
-    def upload_folder(self, folder, bucket, log_file, remove_folder=True):
+    def upload_folder(self, folder, bucket, log_file, remove_folder=False):
         """
         Method Name :   upload_folder
         Description :   This method uploades a uploades folder to s3 bucket

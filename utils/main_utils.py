@@ -1,3 +1,6 @@
+from os import makedirs
+
+from air_pressure.mongodb_operations.mongo_operations import MongoDB_Operation
 from air_pressure.s3_bucket_operations.s3_operations import S3_Operation
 from utils.logger import App_Logger
 from utils.read_params import get_log_dic, read_params
@@ -99,23 +102,3 @@ class Main_Utils:
         except Exception as e:
             self.log_writer.exception_log(e, **log_dic)
 
-
-# from os import listdir
-
-# from pandas import read_csv
-
-# from air_pressure.mongodb_operations.mongo_operations import MongoDB_Operation
-
-# folder = "data_given/train_batch"
-
-# mongo_op = MongoDB_Operation()
-
-
-# for f in listdir(folder):
-#     fname = folder + "/" + f
-
-#     df = read_csv(fname)
-
-#     collection_name = f.split(".")[0]
-
-#     mongo_op.insert_dataframe_as_record(df,"air_pressure",collection_name,"test.log")

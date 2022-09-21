@@ -22,13 +22,17 @@ data:
     bad_data_dir: bad/pred
 
 mongodb:
-  air_pressure_data_db_name: air_pressure-data
+  air_pressure_data_db_name: air_pressure
   air_pressure_train_data_collection: air_pressure-train-data
   air_pressure_pred_data_collection: air_pressure-pred-data
 
 knn_imputer:
   n_neighbors: 3
   weights: uniform
+
+data_split_ratio: 0.7
+
+raw_data_folder_name: data
 
 kmeans_cluster:
   init: k-means++
@@ -130,6 +134,7 @@ log:
   pred_name_validation: pred_name_validation.log
   pred_main: pred_main.log
   pred_values_from_schema: pred_values_from_schema.log
+  data_transfer: data_transfer.log
 
 schema_file:
   train_schema_file: config/air_pressure_schema_training.json

@@ -12,6 +12,7 @@ from air_pressure.validation_insertion.prediction_validation_insertion import \
     Pred_Validation
 from air_pressure.validation_insertion.train_validation_insertion import \
     Train_Validation
+from utils.data_transfer import Data_Transfer
 from utils.read_params import read_params
 
 app = FastAPI()
@@ -36,6 +37,19 @@ async def index(request: Request):
     return templates.TemplateResponse(
         config["templates"]["index_html_file"], {"request": request}
     )
+
+
+@app.get("/data_transfer")
+async def data_transfer():
+    try:
+        data_transfer = Data_Transfer()
+
+        data_transfer.transfer_and_split_data_from_mongodb()
+        
+        return Response("Data Transfer and split done successfully !!")
+
+    except Exception as e:
+        return Response(f"Error Occurred! {e}")
 
 
 @app.get("/train")

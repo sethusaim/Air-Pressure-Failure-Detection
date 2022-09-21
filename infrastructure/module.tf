@@ -10,10 +10,6 @@ module "io_files_bucket" {
   source = "./s3_buckets/air_pressure_io_files_bucket"
 }
 
-module "mlflow_bucket" {
-  source = "./s3_buckets/air_pressure_mlflow_bucket"
-}
-
 module "model_bucket" {
   source = "./s3_buckets/air_pressure_model_bucket"
 }
