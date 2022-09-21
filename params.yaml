@@ -29,7 +29,6 @@ mongodb:
 knn_imputer:
   n_neighbors: 3
   weights: uniform
-  missing_values: nan
 
 kmeans_cluster:
   init: k-means++

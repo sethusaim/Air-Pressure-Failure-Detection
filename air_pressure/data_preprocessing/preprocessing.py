@@ -1,6 +1,6 @@
 import numpy as np
-import pandas as pd
 from imblearn.over_sampling import SMOTE
+from pandas import DataFrame
 from sklearn.decomposition import PCA
 from sklearn.impute import KNNImputer
 from sklearn.preprocessing import StandardScaler
@@ -24,9 +24,7 @@ class Preprocessor:
 
         self.log_file = log_file
 
-        self.knn_neighbours = self.config["knn_imputer"]["n_neighbors"]
-
-        self.knn_weights = self.config["knn_imputer"]["weights"]
+        self.knn_params = self.config["knn_imputer"]
 
         self.null_values_file = self.config["null_values_csv_file"]
 
@@ -184,7 +182,7 @@ class Preprocessor:
                     **log_dic,
                 )
 
-                self.dataframe_with_null = pd.DataFrame()
+                self.dataframe_with_null = DataFrame()
 
                 self.dataframe_with_null["columns"] = data.columns
 
@@ -270,17 +268,13 @@ class Preprocessor:
         self.data = data
 
         try:
-            imputer = KNNImputer(
-                n_neighbors=self.knn_neighbours,
-                weights=self.knn_weights,
-                missing_values=np.nan,
-            )
+            imputer = KNNImputer(missing_values=np.nan, **self.knn_params)
 
             self.log_writer.log(f"Initialized {imputer.__class__.__name__}", **log_dic)
 
             self.new_array = imputer.fit_transform(self.data)
 
-            self.new_data = pd.DataFrame(data=self.new_array, columns=self.data.columns)
+            self.new_data = DataFrame(data=self.new_array, columns=self.data.columns)
 
             self.log_writer.log("Created new dataframe with imputed values", **log_dic)
 
@@ -329,7 +323,7 @@ class Preprocessor:
                 f"Transformed the data using {pca_model_name} model", **log_dic
             )
 
-            principal_x = pd.DataFrame(new_data, index=self.data.index)
+            principal_x = DataFrame(new_data, index=self.data.index)
 
             self.log_writer.log(
                 "Created a dataframe for the transformed data", **log_dic
@@ -377,7 +371,7 @@ class Preprocessor:
                 f"Transformed data using {self.scaler.__class__.__name__}", **log_dic
             )
 
-            self.scaled_num_df = pd.DataFrame(
+            self.scaled_num_df = DataFrame(
                 data=self.scaled_data, columns=self.data.columns, index=self.data.index
             )
 
@@ -424,13 +418,38 @@ class Preprocessor:
         except Exception as e:
             self.log_writer.exception_log(e, **log_dic)
 
-    def handleImbalance(self, X, Y):
+    def handle_imbalance(self, X, Y):
+        """
+        Method Name :   handle_imbalance
+        Description :   This method applies SMOTE technique to balance the dataset
+        
+        Output      :   Balanced dataset is returned
+        On Failure  :   Write an exception log and then raise an exception
+
+        Version     :   1.2
+        Revisions   :   moved setup to cloud
+        """
+        log_dic = get_log_dic(
+            self.__class__.__name__,
+            self.handle_imbalance.__name__,
+            __file__,
+            self.log_file,
+        )
+
+        self.log_writer.start_log("start", **log_dic)
+
         try:
             sample = SMOTE()
 
+            self.log_writer.log("Initialized SMOTE", **log_dic)
+
             X_bal, y_bal = sample.fit_resample(X, Y)
+
+            self.log_writer.log("Applied SMOTE technique on the dataset", **log_dic)
+
+            self.log_writer.start_log("exit", **log_dic)
 
             return X_bal, y_bal
 
         except Exception as e:
-            raise e
+            self.log_writer.exception_log(e, **log_dic)

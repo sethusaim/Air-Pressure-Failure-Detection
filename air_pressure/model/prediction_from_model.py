@@ -1,4 +1,4 @@
-import pandas as pd
+from pandas import DataFrame
 
 from air_pressure.data_ingestion.data_loader_prediction import Data_Getter_Pred
 from air_pressure.data_preprocessing.preprocessing import Preprocessor
@@ -164,7 +164,7 @@ class Prediction:
 
             result = list(model.predict(X))
 
-            result = pd.DataFrame(result, columns=["Predictions"])
+            result = DataFrame(result, columns=["Predictions"])
 
             result["Predictions"] = result["Predictions"].map({0: "neg", 1: "pos"})
 

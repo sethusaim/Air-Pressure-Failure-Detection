@@ -76,7 +76,7 @@ class Train_Model:
 
             X = self.preprocessor.apply_pca_transform(X)
 
-            X, Y = self.preprocessor.handleImbalance(X, Y)
+            X, Y = self.preprocessor.handle_imbalance(X, Y)
 
             model_score_lst = self.tuner.train_and_log_models(
                 X, Y, self.model_train_log

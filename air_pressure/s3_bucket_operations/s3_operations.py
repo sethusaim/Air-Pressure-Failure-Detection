@@ -1,7 +1,11 @@
-import json
-import os
-import pickle
 from io import StringIO
+from json import loads
+from os import listdir
+from os import remove as os_remove
+from os.path import join
+from pickle import dump
+from pickle import loads as pickle_loads
+from shutil import rmtree
 
 import boto3
 import pandas as pd
@@ -127,7 +131,7 @@ class S3_Operation:
 
             json_content = self.read_object(f_obj, log_file)
 
-            dic = json.loads(json_content)
+            dic = loads(json_content)
 
             self.log_writer.log(f"Read {fname} from {bucket} bucket", **log_dic)
 
@@ -350,7 +354,7 @@ class S3_Operation:
                     f"Option remove is set {remove}..deleting the file", **log_dic
                 )
 
-                os.remove(from_fname)
+                os_remove(from_fname)
 
                 self.log_writer.log(
                     f"Removed the local copy of {from_fname}", **log_dic
@@ -589,7 +593,7 @@ class S3_Operation:
 
             model_obj = self.read_object(f_obj, log_file, decode=False)
 
-            model = pickle.loads(model_obj)
+            model = pickle_loads(model_obj)
 
             self.log_writer.log(f"Loaded {model_name} from bucket {bucket}", **log_dic)
 
@@ -623,7 +627,7 @@ class S3_Operation:
             model_file = model_name + self.file_format
 
             with open(file=model_file, mode="wb") as f:
-                pickle.dump(model, f)
+                dump(model, f)
 
             self.log_writer.log(
                 f"Saved {model_name} model as {model_file} name", **log_dic
@@ -679,6 +683,50 @@ class S3_Operation:
             self.upload_file(
                 local_fname, bucket_fname, bucket, log_file,
             )
+
+            self.log_writer.start_log("exit", **log_dic)
+
+        except Exception as e:
+            self.log_writer.exception_log(e, **log_dic)
+
+    def upload_folder(self, folder, bucket, log_file, remove_folder=True):
+        """
+        Method Name :   upload_folder
+        Description :   This method uploades a uploades folder to s3 bucket
+        
+        Output      :   Folder is uploaded to s3 bucket
+        On Failure  :   Write an exception log and then raise an exception
+        
+        Version     :   1.2
+        Revisions   :   moved setup to cloud
+        """
+        log_dic = get_log_dic(
+            self.__class__.__name__, self.upload_folder.__name__, __file__, log_file
+        )
+
+        self.log_writer.start_log("start", **log_dic)
+
+        try:
+            lst = listdir(folder)
+
+            self.log_writer.log("Got a list of files from folder", **log_dic)
+
+            for f in lst:
+                local_f = join(folder, f)
+
+                dest_f = folder + "/" + f
+
+                self.upload_file(
+                    local_f, dest_f, bucket, log_dic["log_file"], remove=False
+                )
+
+            self.log_writer.log("Uploaded folder to s3 bucket", **log_dic)
+
+            if remove_folder is True:
+                rmtree(folder)
+
+            else:
+                pass
 
             self.log_writer.start_log("exit", **log_dic)
 

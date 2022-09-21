@@ -6,7 +6,6 @@ from fastapi.middleware.cors import CORSMiddleware
 from fastapi.responses import Response
 from fastapi.templating import Jinja2Templates
 
-from air_pressure.model.load_production_model import Load_Prod_Model
 from air_pressure.model.prediction_from_model import Prediction
 from air_pressure.model.training_model import Train_Model
 from air_pressure.validation_insertion.prediction_validation_insertion import \
@@ -50,9 +49,9 @@ async def trainRouteClient():
 
         model_score_lst = train_model.training_model()
 
-        load_prod_model = Load_Prod_Model()
+        # load_prod_model = Load_Prod_Model()
 
-        load_prod_model.load_production_model(model_score_lst)
+        # load_prod_model.load_production_model(model_score_lst)
 
         return Response("Training successfull!!")
 

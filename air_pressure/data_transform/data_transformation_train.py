@@ -7,7 +7,6 @@ class Data_Transform_Train:
     """
     Description :  This class shall be used for transforming the training batch data before loading it in Database!!.
     
-    
     Version     :   1.2
     Revisions   :   Moved to setup to cloud 
     """

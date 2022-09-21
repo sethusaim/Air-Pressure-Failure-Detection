@@ -7,7 +7,6 @@ class Data_Transform_Pred:
     """
     Description :  This class shall be used for transforming the preding batch data before loading it in Database!!.
     
-    
     Version     :   1.2
     Revisions   :   Moved to setup to cloud 
     """

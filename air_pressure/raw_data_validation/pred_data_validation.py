@@ -1,4 +1,4 @@
-import re
+from re import match, split
 
 from air_pressure.s3_bucket_operations.s3_operations import S3_Operation
 from utils.logger import App_Logger
@@ -186,10 +186,10 @@ class Raw_Pred_Data_Validation:
 
                 self.log_writer.log("Created raw,good and bad data file name", *log_dic)
 
-                if re.match(regex, fname):
-                    splitAtDot = re.split(".csv", fname)
+                if match(regex, fname):
+                    splitAtDot = split(".csv", fname)
 
-                    splitAtDot = re.split("_", splitAtDot[0])
+                    splitAtDot = split("_", splitAtDot[0])
 
                     if len(splitAtDot[1]) == LengthOfDateStampInFile:
                         if len(splitAtDot[2]) == LengthOfTimeStampInFile:
