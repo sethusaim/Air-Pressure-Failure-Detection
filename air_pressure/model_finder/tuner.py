@@ -1,9 +1,7 @@
-import mlflow
 from sklearn.ensemble import AdaBoostClassifier, RandomForestClassifier
 from sklearn.metrics import accuracy_score, roc_auc_score
 from sklearn.model_selection import GridSearchCV, train_test_split
 
-from air_pressure.mlflow_utils.mlflow_operations import MLFlow_Operation
 from air_pressure.s3_bucket_operations.s3_operations import S3_Operation
 from utils.logger import App_Logger
 from utils.read_params import get_log_dic, read_params
@@ -24,19 +22,13 @@ class Model_Finder:
 
         self.s3 = S3_Operation()
 
-        self.mlflow_op = MLFlow_Operation(log_file)
-
         self.tuner_kwargs = self.config["model_utils"]
 
         self.split_kwargs = self.config["base"]
 
-        self.run_name = self.config["mlflow_config"]["run_name"]
-
         self.train_model_dir = self.config["model_dir"]["trained"]
 
         self.model_bucket = self.config["s3_bucket"]["air_pressure_model_bucket"]
-
-        self.exp_name = self.config["mlflow_config"]["experiment_name"]
 
         self.save_format = self.config["save_format"]
 
@@ -274,13 +266,6 @@ class Model_Finder:
                 self.s3.save_model(
                     tm[1], self.train_model_dir, self.model_bucket, log_file
                 )
-
-                self.mlflow_op.set_mlflow_tracking_uri()
-
-                self.mlflow_op.set_mlflow_experiment(self.exp_name)
-
-                with mlflow.start_run(run_name=self.run_name):
-                    self.mlflow_op.log_all_for_model(tm[1], tm[0])
 
             self.log_writer.log(
                 "Saved and logged all trained models to mlflow", **log_dic

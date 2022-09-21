@@ -1,6 +1,5 @@
 from air_pressure.data_ingestion.data_loader_train import Data_Getter_Train
 from air_pressure.data_preprocessing.preprocessing import Preprocessor
-from air_pressure.mlflow_utils.mlflow_operations import MLFlow_Operation
 from air_pressure.model_finder.tuner import Model_Finder
 from air_pressure.s3_bucket_operations.s3_operations import S3_Operation
 from utils.logger import App_Logger
@@ -24,8 +23,6 @@ class Train_Model:
         self.model_train_log = self.config["log"]["model_training"]
 
         self.target_col = self.config["target_col"]
-
-        self.mlflow_op = MLFlow_Operation(self.model_train_log)
 
         self.data_getter_train = Data_Getter_Train(self.model_train_log)
 

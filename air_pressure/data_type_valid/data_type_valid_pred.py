@@ -68,9 +68,9 @@ class DB_Operation_Pred:
                 if file.endswith(".csv"):
                     self.mongo.insert_dataframe_as_record(
                         df,
-                        db_name=good_data_db_name,
-                        collection_name=good_data_collection_name,
-                        log_file=self.pred_db_insert_log,
+                        good_data_db_name,
+                        good_data_collection_name,
+                        self.pred_db_insert_log,
                     )
 
                 else:
@@ -107,9 +107,7 @@ class DB_Operation_Pred:
 
         try:
             df = self.mongo.get_collection_as_dataframe(
-                db_name=good_data_db_name,
-                collection_name=good_data_collection_name,
-                log_file=self.pred_export_csv_log,
+                good_data_db_name, good_data_collection_name, self.pred_export_csv_log
             )
 
             self.s3.upload_df_as_csv(

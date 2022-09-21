@@ -6,10 +6,6 @@ terraform {
   }
 }
 
-module "app_runner" {
-  source = "./app_runner"
-}
-
 module "io_files_bucket" {
   source = "./s3_buckets/air_pressure_io_files_bucket"
 }
