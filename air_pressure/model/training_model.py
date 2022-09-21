@@ -78,9 +78,7 @@ class Train_Model:
 
             X, Y = self.preprocessor.handle_imbalance(X, Y)
 
-            model_score_lst = self.tuner.train_and_log_models(
-                X, Y, self.model_train_log
-            )
+            model_score_lst = self.tuner.train_and_save_models(X,Y)
 
             self.log_writer.log("Successful End of Training", **log_dic)
 

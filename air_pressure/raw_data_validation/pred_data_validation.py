@@ -184,7 +184,7 @@ class Raw_Pred_Data_Validation:
 
                 bad_data_pred_fname = self.bad_pred_data_dir + "/" + fname
 
-                self.log_writer.log("Created raw,good and bad data file name", *log_dic)
+                self.log_writer.log("Created raw,good and bad data file name", **log_dic)
 
                 if match(regex, fname):
                     splitAtDot = split(".csv", fname)

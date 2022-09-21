@@ -23,7 +23,9 @@ class DB_Operation_Train:
 
         self.good_data_train_dir = self.config["data"]["train"]["good_data_dir"]
 
-        self.input_files_bucket = self.config["s3_bucket"]["input_files_bucket"]
+        self.features_store_bucket = self.config["s3_bucket"][
+            "air_pressure_feature_store"
+        ]
 
         self.train_db_insert_log = self.config["log"]["train_db_insert"]
 
@@ -116,9 +118,11 @@ class DB_Operation_Train:
                 df,
                 self.train_export_csv_file,
                 self.train_export_csv_file,
-                self.input_files_bucket,
-                self.input_files_bucket,
+                self.features_store_bucket,
+                self.features_store_bucket,
             )
+            
+            self.mongo.delete_database(good_data_db_name,self.train_export_csv_log)
 
             self.log_writer.start_log("exit", **log_dic)
 

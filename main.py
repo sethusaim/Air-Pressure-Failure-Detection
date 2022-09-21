@@ -13,6 +13,7 @@ from air_pressure.validation_insertion.prediction_validation_insertion import \
 from air_pressure.validation_insertion.train_validation_insertion import \
     Train_Validation
 from utils.data_transfer import Data_Transfer
+from utils.main_utils import Main_Utils
 from utils.read_params import read_params
 
 app = FastAPI()
@@ -45,7 +46,7 @@ async def data_transfer():
         data_transfer = Data_Transfer()
 
         data_transfer.transfer_and_split_data_from_mongodb()
-        
+
         return Response("Data Transfer and split done successfully !!")
 
     except Exception as e:
@@ -71,6 +72,11 @@ async def trainRouteClient():
 
     except Exception as e:
         return Response(f"Error Occurred! {e}")
+    
+    finally:
+        utils = Main_Utils()
+
+        utils.upload_logs()
 
 
 @app.get("/predict")
@@ -90,6 +96,11 @@ async def predictRouteClient():
 
     except Exception as e:
         return Response(f"Error Occurred! {e}")
+    
+    finally:
+        utils = Main_Utils()
+
+        utils.upload_logs()
 
 
 if __name__ == "__main__":

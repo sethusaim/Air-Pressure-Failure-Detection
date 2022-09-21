@@ -5,7 +5,7 @@ from utils.read_params import get_log_dic, read_params
 
 class Data_Getter_Pred:
     """
-    Description :   This class shall be used for obtaining the df from the input files s3 bucket where the prediction file is present
+    Description :   This class shall be used for obtaining the df from the input files s3 bucket where the training file is present
     
     Version     :   1.2
     Revisions   :   Moved to setup to cloud 
@@ -16,9 +16,9 @@ class Data_Getter_Pred:
 
         self.log_file = log_file
 
-        self.prediction_file = self.config["export_csv_file"]["pred"]
+        self.pred_csv_file = self.config["export_csv_file"]["pred"]
 
-        self.input_files_bucket = self.config["s3_bucket"]["input_files_bucket"]
+        self.feature_store_bucket = self.config["s3_bucket"]["air_pressure_feature_store"]
 
         self.s3 = S3_Operation()
 
@@ -27,10 +27,10 @@ class Data_Getter_Pred:
     def get_data(self):
         """
         Method Name :   get_data
-        Description :   This method reads the data from the input files s3 bucket where the prediction file is present
+        Description :   This method reads the data from the input files s3 bucket where the training file is stored
         Output      :   A pandas dataframe
         
-        On Failure  :   Write an exception log and then raise an exception
+        On Failure  :   Write an exception log and then raise exception
         
         Version     :   1.2
         Revisions   :   moved setup to cloud
@@ -43,7 +43,7 @@ class Data_Getter_Pred:
 
         try:
             df = self.s3.read_csv(
-                self.prediction_file, self.input_files_bucket, self.log_file,
+                self.pred_csv_file, self.feature_store_bucket, self.log_file,
             )
 
             self.log_writer.start_log("exit", **log_dic)

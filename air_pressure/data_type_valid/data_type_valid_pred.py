@@ -23,7 +23,9 @@ class DB_Operation_Pred:
 
         self.good_data_pred_dir = self.config["data"]["pred"]["good_data_dir"]
 
-        self.input_files_bucket = self.config["s3_bucket"]["input_files_bucket"]
+        self.features_store_bucket = self.config["s3_bucket"][
+            "air_pressure_feature_store"
+        ]
 
         self.pred_db_insert_log = self.config["log"]["pred_db_insert"]
 
@@ -57,7 +59,9 @@ class DB_Operation_Pred:
 
         try:
             lst = self.s3.read_csv_from_folder(
-                self.good_data_pred_dir, self.pred_data_bucket, self.pred_db_insert_log,
+                self.good_data_pred_dir,
+                self.pred_data_bucket,
+                self.pred_db_insert_log,
             )
 
             for _, f in enumerate(lst):
@@ -68,9 +72,9 @@ class DB_Operation_Pred:
                 if file.endswith(".csv"):
                     self.mongo.insert_dataframe_as_record(
                         df,
-                        good_data_db_name,
-                        good_data_collection_name,
-                        self.pred_db_insert_log,
+                        db_name=good_data_db_name,
+                        collection_name=good_data_collection_name,
+                        log_file=self.pred_db_insert_log,
                     )
 
                 else:
@@ -114,9 +118,11 @@ class DB_Operation_Pred:
                 df,
                 self.pred_export_csv_file,
                 self.pred_export_csv_file,
-                self.input_files_bucket,
-                self.input_files_bucket,
+                self.features_store_bucket,
+                self.features_store_bucket,
             )
+            
+            self.mongo.delete_database(good_data_db_name,self.pred_export_csv_log)
 
             self.log_writer.start_log("exit", **log_dic)
 

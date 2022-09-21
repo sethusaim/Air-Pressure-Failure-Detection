@@ -18,7 +18,7 @@ class Data_Getter_Train:
 
         self.train_csv_file = self.config["export_csv_file"]["train"]
 
-        self.input_files_bucket = self.config["s3_bucket"]["input_files_bucket"]
+        self.feature_store_bucket = self.config["s3_bucket"]["air_pressure_feature_store"]
 
         self.s3 = S3_Operation()
 
@@ -43,7 +43,7 @@ class Data_Getter_Train:
 
         try:
             df = self.s3.read_csv(
-                self.train_csv_file, self.input_files_bucket, self.log_file,
+                self.train_csv_file, self.feature_store_bucket, self.log_file,
             )
 
             self.log_writer.start_log("exit", **log_dic)

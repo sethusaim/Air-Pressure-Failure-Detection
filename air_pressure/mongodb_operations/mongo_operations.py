@@ -295,3 +295,31 @@ class MongoDB_Operation:
 
         except Exception as e:
             self.log_writer.exception_log(e, **log_dic)
+
+
+    def delete_database(self,db_name,log_file):
+        """
+        Method Name :   delete_database
+        Description :   This method deletes the database from mongodb
+        
+        Output      :   Database is removed from mongodb
+        On Failure  :   Write an exception log and then raise an exception
+
+        Version     :   1.2
+        Revisions   :   moved setup to cloud
+        """
+        log_dic = get_log_dic(self.__class__.__name__,self.delete_database.__name__,__file__,log_file)
+        
+        self.log_writer.start_log("start",**log_dic)
+        
+        try:
+            self.log_writer.log("Deleting the database from MongoDB",**log_dic)
+            
+            self.client.drop_database(db_name)
+            
+            self.log_writer.log("Deleted the database from MongoDB",**log_dic)
+            
+            self.log_writer.start_log("exit",**log_dic)
+        
+        except Exception as e:
+            self.log_writer.exception_log(e,**log_dic)

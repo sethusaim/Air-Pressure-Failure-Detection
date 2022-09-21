@@ -19,6 +19,7 @@ class Raw_Train_Data_Validation:
         self.config = read_params()
 
         self.raw_data_bucket = self.config["s3_bucket"]["air_pressure_raw_data_bucket"]
+
         self.log_writer = App_Logger()
 
         self.s3 = S3_Operation()
@@ -181,7 +182,7 @@ class Raw_Train_Data_Validation:
 
                 bad_data_train_fname = self.bad_train_data_dir + "/" + fname
 
-                self.log_writer.log("Created raw,good and bad data file name", *log_dic)
+                self.log_writer.log("Created raw,good and bad data file name", **log_dic)
 
                 if match(regex, fname):
                     splitAtDot = split(".csv", fname)

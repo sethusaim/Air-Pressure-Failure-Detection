@@ -1,4 +1,4 @@
-from os import makedirs
+from shutil import rmtree
 
 from air_pressure.mongodb_operations.mongo_operations import MongoDB_Operation
 from air_pressure.s3_bucket_operations.s3_operations import S3_Operation
@@ -14,9 +14,7 @@ class Main_Utils:
     Revisions   :   Moved to setup to cloud 
     """
 
-    def __init__(self, log_file):
-        self.log_file = log_file
-
+    def __init__(self):
         self.config = read_params()
 
         self.model_bucket = self.config["s3_bucket"]["air_pressure_model_bucket"]
@@ -28,6 +26,12 @@ class Main_Utils:
         self.train_data_bucket = self.config["s3_bucket"][
             "air_pressure_train_data_bucket"
         ]
+        
+        self.log_bucket = self.config["s3_bucket"]["air_pressure_logs_bucket"]
+        
+        self.log_dir = self.config["dir"]["log"]
+        
+        self.general_log = self.config["log"]["train_general"]
 
         self.s3 = S3_Operation()
 
@@ -101,4 +105,34 @@ class Main_Utils:
 
         except Exception as e:
             self.log_writer.exception_log(e, **log_dic)
+            
+    def upload_logs(self):
+        """
+        Method Name :   upload_logs
+        Description :   This method uploads the logs to s3 bucket
+        
+        Output      :   The logs are uploaded to s3 bucket
+        On Failure  :   Write an exception log and then raise an exception
+        
+        Version     :   1.2
+        Revisions   :   moved setup to cloud
+        """
+        log_dic = get_log_dic(
+            self.__class__.__name__, self.upload_logs.__name__, __file__, "upload"
+        )
 
+        self.log_writer.start_log("start", **log_dic)
+
+        try:            
+            self.s3.upload_folder(self.log_dir,self.log_bucket,self.general_log)
+
+            self.log_writer.log("Uploaded logs to s3 bucket", **log_dic)
+
+            self.log_writer.start_log("exit", **log_dic)
+
+            self.log_writer.stop_log()
+
+            rmtree(self.log_dir)
+
+        except Exception as e:
+            self.log_writer.exception_log(e, **log_dic)

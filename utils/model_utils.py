@@ -3,7 +3,7 @@ from os.path import join
 from pickle import dump, load
 
 import xgboost
-from sklearn.metrics import r2_score
+from sklearn.metrics import roc_auc_score
 from sklearn.model_selection import GridSearchCV
 from sklearn.utils import all_estimators
 
@@ -55,11 +55,11 @@ class Model_Utils:
             self.log_writer.log(
                 f"Used {model_name} model to get predictions on test data", **log_dic
             )
-
-            self.model_score = r2_score(test_y, preds)
+            
+            self.model_score = roc_auc_score(test_y,preds)
 
             self.log_writer.log(
-                f"R2 score for {model_name} is {self.model_score}", **log_dic
+                f"ROC AUC score for {model_name} is {self.model_score}", **log_dic
             )
 
             self.log_writer.start_log("exit", **log_dic)
